@@ -1,0 +1,73 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Sep 8, 2021, 7:58:07 PM
+    Author     : Kenneth Lee
+*/
+
+.logo{
+    width: 35px;
+    height: 35px;
+    filter:invert(100%);
+}
+
+h2{
+    text-decoration: underline;
+}
+
+figure>img{
+  border: double grey;
+  border-radius: 2px;
+  height: 180px !important;
+}
+
+figure{
+    display: inline-block;
+}
+
+figcaption{
+    text-align:center;
+    font-style: italic;
+    color:grey;
+}
+
+footer{
+    border-top: solid grey;
+    padding: 15px;
+    text-align: center;
+    font-size:0.8em;
+}
+
+.pop-up{
+    padding:5px;
+    background-color:grey;
+    position:absolute;
+    display:inline;
+    top:0px;
+    left:200px;
+    transition: 0.3s;
+    animation-name:fade;
+    animation-duration:0.5s;
+    z-index:2
+}
+@keyframes fade {
+  from {opacity:0}
+  to {opacity:100}
+}
+.pop-up > img{
+    height:240px;
+    animation-name: zoom;
+    animation-duration: 0.5s
+}
+
+@keyframes zoom {
+    from {
+        height:0px;
+    }
+    to {
+        height: 240px;
+    }
+}
