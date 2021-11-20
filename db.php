@@ -1,126 +1,187 @@
 <?php
 
-/* 
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-function getUserFromID($id){
+function time_elapsed_string($datetime, $full = false) {
+    $now = new DateTime;
+    $ago = new DateTime($datetime);
+    $diff = $now->diff($ago);
+
+    $diff->w = floor($diff->d / 7);
+    $diff->d -= $diff->w * 7;
+
+    $string = array(
+        'y' => 'year',
+        'm' => 'month',
+        'w' => 'week',
+        'd' => 'day',
+        'h' => 'hour',
+        'i' => 'minute',
+        's' => 'second',
+    );
+    foreach ($string as $k => &$v) {
+        if ($diff->$k) {
+            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
+        } else {
+            unset($string[$k]);
+        }
+    }
+
+    if (!$full) $string = array_slice($string, 0, 1);
+    return $string ? implode(', ', $string) . ' ago' : 'just now';
+}
+
+function getUserFromID($id) {
     //Create database connection
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
 
     // Check connection
-    if($conn->connect_error){
-        $errorMsg = "Connection failed: " . $conn -> connect_error;
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
         $success = false;
-    }else{
+    } else {
         //Prepare the statement:
-        $stmt = $conn -> prepare("SELECT * FROM users WHERE userID =?");
+        $stmt = $conn->prepare("SELECT * FROM users WHERE userID =?");
         //Bind & Execute the query statement:
-        $stmt->bind_param("i",$id);
-        if(!$stmt-> execute()){
+        $stmt->bind_param("i", $id);
+        if (!$stmt->execute()) {
             $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
             $success = false;
-        }else{
+        } else {
             $result = $stmt->get_result();
             $user = $result->fetch_assoc();
         }
         $stmt->close();
-
     }
     $conn->close();
     return $user;
 }
 
-function getPostsRelatedToQuery($query){
+function getPostsRelatedToQuery($query) {
     $query = "%$query%";
     //Create database connection
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
 
     // Check connection
-    if($conn->connect_error){
-        $errorMsg = "Connection failed: " . $conn -> connect_error;
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
         $success = false;
-    }else{
+    } else {
         //Prepare the statement:
-        $stmt = $conn -> prepare("SELECT * FROM post WHERE content LIKE ? OR title LIKE ?");
+        $stmt = $conn->prepare("SELECT * FROM post WHERE content LIKE ? OR title LIKE ?");
         //Bind & Execute the query statement:
-        $stmt->bind_param("ss",$query,$query);
-        if(!$stmt-> execute()){
+        $stmt->bind_param("ss", $query, $query);
+        if (!$stmt->execute()) {
             $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
             $success = false;
-        }else{
+        } else {
             $result = $stmt->get_result();
         }
         $stmt->close();
-
     }
     $conn->close();
     return $result;
 }
-function getUserByUserName($query){
+
+function getUserByUserName($query) {
     $query = "%$query%";
     //Create database connection
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
 
     // Check connection
-    if($conn->connect_error){
-        $errorMsg = "Connection failed: " . $conn -> connect_error;
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
         $success = false;
-    }else{
+    } else {
         //Prepare the statement:
-        $stmt = $conn -> prepare("SELECT * FROM users WHERE username LIKE ? OR fname LIKE ? or lname LIKE ? or email LIKE ?");
-        
+        $stmt = $conn->prepare("SELECT * FROM users WHERE username LIKE ? OR fname LIKE ? or lname LIKE ? or email LIKE ?");
+
         //Bind & Execute the query statement:
-        $stmt->bind_param("ssss",$query,$query,$query,$query);
-        if(!$stmt-> execute()){
+        $stmt->bind_param("ssss", $query, $query, $query, $query);
+        if (!$stmt->execute()) {
             $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
             $success = false;
-        }else{
+        } else {
             $result = $stmt->get_result();
         }
         $stmt->close();
-
     }
     $conn->close();
     return $result;
 }
 
-function getPostByUser($userID){
+function getPostByUser($userID) {
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-    $stmt = $conn -> prepare("SELECT * FROM post WHERE author_id = ? ORDER BY postedDateTime DESC");
-    $stmt->bind_param("i",$userID);
-    if(!$stmt->execute()){
+    $stmt = $conn->prepare("SELECT * FROM post WHERE author_id = ? ORDER BY postedDateTime DESC");
+    $stmt->bind_param("i", $userID);
+    if (!$stmt->execute()) {
         return "No post";
-    }else{
-        
-        $result = $stmt->get_result();
-        return $result;
-    }
-}
-function getPostByID($postID){
-    $config = parse_ini_file('../../private/db-config.ini');
-    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-    $stmt = $conn -> prepare("SELECT * FROM post WHERE post_id = ?");
-    $stmt->bind_param("i",$postID);
-    if(!$stmt->execute()){
-        return "No post";
-    }else{
-        
+    } else {
+
         $result = $stmt->get_result();
         return $result;
     }
 }
 
-function follow($currUserID, $followToUserID){
-    
+function getPostByID($postID) {
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-    $stmt = $conn -> prepare("INSERT INTO users (username, fname, lname, email, password) VALUES (?,?,?,?,?)");
-    $stmt->bind_param("ii",$currUserID,$followToUserID);
+    $stmt = $conn->prepare("SELECT * FROM post WHERE post_id = ?");
+    $stmt->bind_param("i", $postID);
+    if (!$stmt->execute()) {
+        return "No post";
+    } else {
+
+        $result = $stmt->get_result();
+        return $result;
+    }
 }
+
+function getFollowerCount($userID) {
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $sql = 'select count(*) from followers WHERE userID =?';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $userID);
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_row()[0];
+    $stmt->close();
+    $conn->close();
+    return $rows;
+}
+
+function getFollowingCount($userID) {
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $sql = 'select count(*) from followers WHERE followerID =?';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $userID);
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_row()[0];
+    $stmt->close();
+    $conn->close();
+    return $rows;
+}
+
+
+function getLikesForPost($postID) {
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $sql = 'select count(*) from likes WHERE postID =?';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $postID);
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_row()[0];
+    $stmt->close();
+    $conn->close();
+    return $rows;
+}
+
 ?>

@@ -44,8 +44,10 @@ and open the template in the editor.
                                 <img src="https://bootdey.com/img/Content/avatar/avatar1.png" class="rounded-circle avatar-lg img-thumbnail" alt="profile-image">
                                 <div class="w-100 ms-3">
                                     <h4 class="my-0"><?php echo $viewingUser['fname'] . ' ' . $viewingUser['lname']; ?></h4>
-                                    <p class="text-muted"><?php echo $viewingUser['username'] ?></p>
-                                    <button type="button" class="btn btn-soft-primary btn-xs waves-effect mb-2 waves-light">Follow</button>
+                                    <p class="text-muted">@<?php echo $viewingUser['username'] ?></p>
+                                        <a href='process_follow.php?followerID=<?php echo $userID?>' class="btn btn-primary">
+                                            Follow
+                                        </a>
                                     <button type="button" class="btn btn-soft-success btn-xs waves-effect mb-2 waves-light">Subscribe</button>
                                 </div>
                             </div>
@@ -79,11 +81,15 @@ and open the template in the editor.
                     <div class="card">
                         <div class="card-body text-center">
                             <div class="row">
-                                <div class="col-6 border-end border-light">
+                                <div class="col-4 border-end border-light">
                                     <h5 class="text-muted mt-1 mb-2 fw-normal">Followers</h5>
-                                    <h2 class="mb-0 fw-bold">0</h2>
+                                    <h2 class="mb-0 fw-bold"><?php echo getFollowerCount($userID)?></h2>
                                 </div>
-                                <div class="col-6 border-end border-light">
+                                <div class="col-4 border-end border-light">
+                                    <h5 class="text-muted mt-1 mb-2 fw-normal">Following</h5>
+                                    <h2 class="mb-0 fw-bold"><?php echo getFollowingCount($userID)?></h2>
+                                </div>
+                                <div class="col-4 border-end border-light">
                                     <h5 class="text-muted mt-1 mb-2 fw-normal">Subscribers</h5>
                                     <h2 class="mb-0 fw-bold">0</h2>
                                 </div>
@@ -140,14 +146,14 @@ and open the template in the editor.
                                         <div class="d-flex align-items-start">
                                             <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
                                             <div class="w-100">
-                                                <h5 class=""><?php echo $row[2] ?><small class="text-muted"><?php echo $row[4] ?></small></h5>
+                                                <h5 class=""><a href="#" class="link-dark"><?php echo $row[2] ?>   </a> <small class="text-muted"><?php echo time_elapsed_string($row[4]) ?></small></h5>
                                                 <p class="card-text"></p>
                                                 <div class="">
                                                     <?php echo $row[3] ?>
                                                     <br>
-                                                    <a href="javascript: void(0);" class="text-muted font-13 d-inline-block mt-2"><i class="mdi mdi-reply"></i> Reply</a>
+                                                    <a href="process_like.php?postID=<?php echo $row[0]?>" class="text-muted font-13 d-inline-block mt-2"><i class="mdi mdi-reply"></i><?php echo getLikesForPost($row[0])?> Like</a>
                                                 </div>
-                                                <a href="#" class="btn btn-primary">View Post</a>
+                                                <hr>
                                             </div>
                                         </div>
                                         <?php
