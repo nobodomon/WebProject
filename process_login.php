@@ -61,7 +61,7 @@
                 $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
             }else{
                 //Prepare the statement:
-                $stmt = $conn -> prepare("SELECT * FROM world_of_pets_members WHERE email =?");
+                $stmt = $conn -> prepare("SELECT * FROM users WHERE email =?");
                 //Bind & Execute the query statement:
                 $stmt->bind_param("s",$email);
                 if(!$stmt-> execute()){
@@ -80,6 +80,10 @@
                         $h3 = "<h3>Login successful!</h3>";
                         $h4 = "<h4>Welcome back," . $lname . " " . $fname . ".</h4>";
                         $btn = "<a href='index.php'><button class = 'btn btn-success'>Return to Home</button></a><br>";
+                        session_start();
+                        $_SESSION["userID"] = $user['userID'];
+                        $_SESSION["fname"] = $user['fname'];
+                        $_SESSION["lname"] = $user['lname'];
                     }else{
                         $h3 = "<h3>Oops!</h3>";
                         $h4 = "<h4>The following errors were detected:</h4>";

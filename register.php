@@ -27,6 +27,10 @@ and open the template in the editor.
                     <input class="form-control" type="text" id="lname" name="lname" required maxlength="45" placeholder="Enter last name"> 
                 </div>
                 <div class="form-group">
+                    <label for="email">Username:</label>
+                    <input class="form-control" type="text" id="username" name="username" required placeholder="Enter username"> 
+                </div>
+                <div class="form-group">
                     <label for="email">Email:</label>
                     <input class="form-control" type="email" id="email" name="email" required placeholder="Enter email"> 
                 </div>

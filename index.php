@@ -13,7 +13,9 @@ and open the template in the editor.
             include "nav.inc.php"
         ?>
         <header class="jumbotron text-center" id="home">
-            <h1>Welcome to the World of Pets!</h1>
+            <?php
+                echo "<h1>Welcome back user:" . $_SESSION['userID']."Name: " .$_SESSION['fname'] .  "</h1>"
+            ?>
             <h2>Home of Singapore's Pet Lovers</h2>
         </header>
         <main class="container">

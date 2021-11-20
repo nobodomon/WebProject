@@ -14,7 +14,7 @@ and open the template in the editor.
         ?>
         <main class="container">
             <h1>Member Login</h1>
-            <p>   For existing members log in here. FOr new members, please go to the
+            <p>   For existing members log in here. For new members, please go to the
                 <a href="register.php">Sign Up page</a>. 
             </p>
             <form action="process_login.php" method="post">

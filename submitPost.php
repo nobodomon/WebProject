@@ -7,37 +7,21 @@
         include "nav.inc.php"
         ?>
         <?php
-        $email = $errorMsg = "";
+        $title = $errorMsg = "";
         $success = true;
-        if (empty($_POST["email"]) || empty($_POST["username"])) {
-            $errorMsg .= "Email is required.<br>";
+        if (empty($_POST["title"]) || empty($_POST["content"])) {
+            $errorMsg .= "Title and content is required.<br>";
             $success = false;
         } else {
-            $email = sanitize_input($_POST["email"]);
-            $username = sanitize_input($_POST["username"]);
-            $lname = sanitize_input($_POST["lname"]);
-            $fname = sanitize_input($_POST["fname"]);
-            // Check if password and confirm passwords are the same
-            if ($_POST["pwd"] === $_POST["pwd_confirm"]) {
-                $pwd = password_hash($_POST["pwd"], PASSWORD_DEFAULT);
-            } else {
-                $errorMsg = $errorMsg . "Password do not match. <br>";
-                $success = false;
-            }
-            // Additional check to make sure e-mail address is well  -formed.
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errorMsg = $errorMsg . "Inva   lid email format.<br>";
-                $success = false;
-            }
+            $title = $_POST['title'];
+            $content = $_POST['content'];
         }
         if ($success) {
             //$h3 = "<h3>Your Registration successful!</h3>";
             //$h4 = "<h4>Thank you for signing up, ". $_POST["lname"]. " " . $_POST["fname"] ."</h4>";
             //$btn = "<a href='#'><button class = 'btn btn-success'>Log-in </button></a><br>";
-            if(saveMemberToDB()){
-                $h3 = "<h3>Your Registration successful!</h3>";
-                $h4 = "<h4>Thank you for signing up, ". $lname . " " . $fname ."</h4>";
-                $btn = "<a href='#'><button class = 'btn btn-success'>Log-in </button></a><br>";
+            if(createPost()){
+                $h3 = "<h3>Post submitted!</h3>";
                 
             }else{
                 
@@ -49,23 +33,11 @@
             $errors = "<p>" . $errorMsg . "</p>";
             $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
         }
-
-        //Helper function that checks input for malicious or unwanted content. 
-        function sanitize_input($data) {
-            $data = trim($data);
-            $data = stripslashes($data);
-            $data = htmlspecialchars($data);
-            return $data;
-        }
         
-        function saveMemberToDB(){
-            global $errorMsg, $success,$username, $fname, $lname, $email, $pwd;
-            
-            //Create database connection
+        function createPost(){
+            global $success,$errorMsg, $title, $content;
             $config = parse_ini_file('../../private/db-config.ini');
             $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-            
-            // Check connection
             if($conn->connect_error){
                 $errorMsg = "Connection failed: " . $conn -> connect_error;
                 $success = false;
@@ -75,33 +47,27 @@
                 $errors = "<p>" . $errorMsg . "</p>";
                 $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
             }else{
-                //Prepare the statement:
-                $stmt = $conn -> prepare("INSERT INTO users (username, fname, lname, email, password) VALUES (?,?,?,?,?)");
-                
+                $stmt = $conn -> prepare("INSERT INTO post (author_id, title, content,postedDateTime) VALUES (?,?,?,?)");
+
                 //Bind & Execute the query statement:
-                $pwd_hashed = $pwd;
-                $stmt-> bind_param("sssss", $username, $fname, $lname, $email, $pwd_hashed);
-                if(!$stmt-> execute()){
+                $dateTimeNow = date_create()->format('Y-m-d H:i:s');
+                $stmt-> bind_param("isss", $_SESSION["userID"], $title, $content,$dateTimeNow);
+                if(!$stmt->execute()){
                     $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
                     $success = false;
                     $h3 = "<h3>Oops!</h3>";
                     $h4 = "<h4>The following input errors were detected:</h4>";
                     $errors = "<p>" . $errorMsg . "</p>";
-                    $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
+                    $btn = "<a href='index.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
                 }else{
-                    
-                    $h3 = "<h3>Your Registration successful!</h3>";
-                    $h4 = "<h4>Thank you for signing up, ". $lname . " " . $fname ."</h4>";
+                    $h3 = "<h3>Post submitted!</h3>";
                     $btn = "<a href='#'><button class = 'btn btn-success'>Log-in </button></a><br>";
                 }
                 $stmt->close();
-                
             }
             $conn->close();
             return $success;
         }
-        
-        
         ?>
         <main class="container">
             <hr>
@@ -113,6 +79,8 @@
                         echo $errors;
                     }
                     echo $btn;
+                    
+                    header('Refresh: 5; Location:profile.php');
                 ?>
             <br>
         </main>
