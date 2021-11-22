@@ -5,6 +5,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 function time_elapsed_string($datetime, $full = false) {
     $now = new DateTime;
     $ago = new DateTime($datetime);
@@ -30,7 +31,8 @@ function time_elapsed_string($datetime, $full = false) {
         }
     }
 
-    if (!$full) $string = array_slice($string, 0, 1);
+    if (!$full)
+        $string = array_slice($string, 0, 1);
     return $string ? implode(', ', $string) . ' ago' : 'just now';
 }
 
@@ -130,6 +132,45 @@ function getPostByUser($userID) {
     }
 }
 
+function getCommentsForPost($postID){
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $stmt = $conn->prepare("SELECT * FROM comments WHERE postID = ? ORDER BY postedDate DESC");
+    $stmt->bind_param("i", $postID);
+    if (!$stmt->execute()) {
+        return "No comments";
+    } else {
+
+        $result = $stmt->get_result();
+        return $result;
+    }
+}
+function getAuthorOfPost($postID){
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+    } else {
+        //Prepare the statement:
+        $stmt = $conn->prepare("SELECT * FROM post WHERE post_id =?");
+        //Bind & Execute the query statement:
+        $stmt->bind_param("i", $postID);
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        } else {
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+        }
+        $stmt->close();
+    }
+    $conn->close();
+    return $user;
+}
 function getPostByID($postID) {
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
@@ -170,7 +211,6 @@ function getFollowingCount($userID) {
     return $rows;
 }
 
-
 function getLikesForPost($postID) {
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
@@ -182,6 +222,48 @@ function getLikesForPost($postID) {
     $stmt->close();
     $conn->close();
     return $rows;
+}
+
+function checkIfLiked($postID,$userID){
+    $config = parse_ini_file('../../private/db-config.ini');
+        $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+        $stmt = $conn ->prepare("SELECT count(*) FROM likes WHERE postID = ? AND likeUserID = ?");
+        $stmt->bind_param("ii", $postID, $userID);
+        $stmt->execute();
+        $rows = $stmt->get_result()->fetch_row()[0];
+        
+        $stmt->close();
+        $conn->close();
+        if($rows == 0)
+        {
+            //if follower record doesn't exist, insert follow record
+            return '<span class="material-icons">favorite_border</span>';
+        }else{
+            //if follower record exist, do unfollow.
+            return '<span class="material-icons">favorite</span>';
+        }
+}
+
+function checkIfFollowed($userID, $currUserID) {
+    if ($userID == $currUserID) {
+        
+    } else {
+
+        $config = parse_ini_file('../../private/db-config.ini');
+        $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+        $stmt = $conn->prepare("SELECT count(*) AS count FROM followers WHERE userID = ? AND followerID = ?");
+        $stmt->bind_param("ii", $userID, $currUserID);
+        $stmt->execute();
+        $rows = $stmt->get_result()->fetch_row()[0];
+        $stmt->close();
+        $conn->close();
+        if ($rows == 0) {
+            return "<a href='process_follow.php?followerID=$userID' class='btn btn-primary'>Follow</a>";
+        } else {
+            //if follower record exist, do unfollow.
+            return "<a href='process_follow.php?followerID=$userID' class='btn btn-primary'>Unfollow</a>";
+        }
+    }
 }
 
 ?>

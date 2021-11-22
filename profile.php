@@ -45,9 +45,9 @@ and open the template in the editor.
                                 <div class="w-100 ms-3">
                                     <h4 class="my-0"><?php echo $viewingUser['fname'] . ' ' . $viewingUser['lname']; ?></h4>
                                     <p class="text-muted">@<?php echo $viewingUser['username'] ?></p>
-                                        <a href='process_follow.php?followerID=<?php echo $userID?>' class="btn btn-primary">
-                                            Follow
-                                        </a>
+                                    <?php
+                                    echo checkIfFollowed($userID, $_SESSION['userID'])
+                                    ?>
                                     <button type="button" class="btn btn-soft-success btn-xs waves-effect mb-2 waves-light">Subscribe</button>
                                 </div>
                             </div>
@@ -83,11 +83,11 @@ and open the template in the editor.
                             <div class="row">
                                 <div class="col-4 border-end border-light">
                                     <h5 class="text-muted mt-1 mb-2 fw-normal">Followers</h5>
-                                    <h2 class="mb-0 fw-bold"><?php echo getFollowerCount($userID)?></h2>
+                                    <h2 class="mb-0 fw-bold"><?php echo getFollowerCount($userID) ?></h2>
                                 </div>
                                 <div class="col-4 border-end border-light">
                                     <h5 class="text-muted mt-1 mb-2 fw-normal">Following</h5>
-                                    <h2 class="mb-0 fw-bold"><?php echo getFollowingCount($userID)?></h2>
+                                    <h2 class="mb-0 fw-bold"><?php echo getFollowingCount($userID) ?></h2>
                                 </div>
                                 <div class="col-4 border-end border-light">
                                     <h5 class="text-muted mt-1 mb-2 fw-normal">Subscribers</h5>
@@ -134,15 +134,15 @@ and open the template in the editor.
                             <!-- end comment box -->
 
                             <!-- Story Box-->
-                            <div class="border border-light p-2 mb-3">
-                                <?php
-                                if ($posts == "No post") {
-                                    echo "<p> No posts! Try creating one </p>";
-                                } else {
+                            <?php
+                            if ($posts == "No post") {
+                                echo "<p> No posts! Try creating one </p>";
+                            } else {
 
-                                    while ($row = $posts->fetch_array(MYSQLI_NUM)) {
-                                        ?>
+                                while ($row = $posts->fetch_array(MYSQLI_NUM)) {
+                                    ?>
 
+                                    <div class="border border-light p-2 mb-3">
                                         <div class="d-flex align-items-start">
                                             <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
                                             <div class="w-100">
@@ -151,22 +151,64 @@ and open the template in the editor.
                                                 <div class="">
                                                     <?php echo $row[3] ?>
                                                     <br>
-                                                    <a href="process_like.php?postID=<?php echo $row[0]?>" class="text-muted font-13 d-inline-block mt-2"><i class="mdi mdi-reply"></i><?php echo getLikesForPost($row[0])?> Like</a>
+                                                    <a href="process_like.php?postID=<?php echo $row[0] ?>" class="d-inline-block mt-2">
+                                                        <?php
+                                                        echo checkIfLiked($row[0], $_SESSION['userID']);
+                                                        echo "(" . getLikesForPost($row[0]) . ")";
+                                                        ?> 
+                                                    </a>
                                                 </div>
                                                 <hr>
                                             </div>
                                         </div>
+
+                                        <?php
+                                        $comments = getCommentsForPost($row[0]);
+                                        if ($comments == "No post") {
+                                            
+                                        } else {
+                                            ?>
+                                            <div class="post-user-comment-box">
+                                                <?php
+                                                while ($commentRows = $comments->fetch_array(MYSQLI_NUM)) {
+                                                    $commentingUser = getUserFromID($commentRows[2]);
+                                                    ?>
+                                                    <div class="d-flex align-items-start">
+                                                        <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="Generic placeholder image">
+                                                        <div class="w-100">
+                                                            <h5 class="mt-0"><?php echo $commentingUser['fname'] . ' ' . $commentingUser['lname'] ?><small class="text-muted"> <?php echo time_elapsed_string($commentRows[4]) ?></small></h5>
+                                                            <?php echo $commentRows[3] ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php
+                                                }
+                                                ?>
+                                                <div class="d-flex align-items-start mt-2">
+                                                    <a class="pe-2" href="#">
+                                                        <img src="https://bootdey.com/img/Content/avatar/avatar1.png" class="rounded-circle" alt="Generic placeholder image" height="31">
+                                                    </a>
+                                                    <form method="post" action="process_comment.php?postID=<?php echo $row[0] ?>">
+                                                        <div class="w-100">
+                                                            <input type="text" id="comment" name="comment" class="form-control border-0 form-control-sm" placeholder="Add comment">
+                                                            <button type="submit" name="_submit" class="btn" value='Submit'>Submit</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <?php
+                                        }
+                                        ?>
+                                    </div>
                                         <?php
                                     }
                                 }
                                 ?>
-                            </div>
-                        </div> <!-- end card-->
+                            </div> <!-- end card-->
 
-                    </div> <!-- end col -->
+                        </div> <!-- end col -->
+                    </div>
+                    <!-- end row-->
                 </div>
-                <!-- end row-->
-
             </div>
         </div>
         <?php

@@ -8,6 +8,7 @@
         ?>
         <?php
         $email = $errorMsg = "";
+        $userID;
         $success = true;
         if (empty($_POST["email"])) {
             $errorMsg .= "Email is required.<br>";
@@ -44,7 +45,7 @@
         }
         
         function retrieveMemberFromDB(){
-            global$email,$pwd, $lname, $fname, $h3, $h4, $btn, $errorMsg, $success;
+            global $userID, $email,$pwd, $lname, $fname, $h3, $h4, $btn, $errorMsg, $success;
             
             //Create database connection
             $config = parse_ini_file('../../private/db-config.ini');
@@ -81,6 +82,7 @@
                         $h4 = "<h4>Welcome back," . $lname . " " . $fname . ".</h4>";
                         $btn = "<a href='index.php'><button class = 'btn btn-success'>Return to Home</button></a><br>";
                         session_start();
+                        $userID = $user['userID'];
                         $_SESSION["userID"] = $user['userID'];
                         $_SESSION["fname"] = $user['fname'];
                         $_SESSION["lname"] = $user['lname'];
@@ -112,6 +114,7 @@
                         echo $errorMsg;
                     }
                     echo $btn;
+                    header("Refresh:5; url=profile.php?userID=$userID");
                 ?>
             <br>
         </main>
