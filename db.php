@@ -63,7 +63,42 @@ function getUserFromID($id) {
     return $user;
 }
 
+<<<<<<< Updated upstream
 function getPostsRelatedToQuery($query) {
+=======
+/* 
+ * Retrieve user details using username
+ */
+function getUserFromUsername($id){
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if($conn->connect_error){
+        $errorMsg = "Connection failed: " . $conn -> connect_error;
+        $success = false;
+    }else{
+        //Prepare the statement:
+        $stmt = $conn -> prepare("SELECT * FROM users WHERE username =?");
+        //Bind & Execute the query statement:
+        $stmt->bind_param("i",$id);
+        if(!$stmt-> execute()){
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        }else{
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+        }
+        $stmt->close();
+
+    }
+    $conn->close();
+    return $user;
+}
+
+function getPostsRelatedToQuery($query){
+>>>>>>> Stashed changes
     $query = "%$query%";
     //Create database connection
     $config = parse_ini_file('../../private/db-config.ini');
@@ -244,6 +279,7 @@ function checkIfLiked($postID,$userID){
         }
 }
 
+<<<<<<< Updated upstream
 function checkIfFollowed($userID, $currUserID) {
     if ($userID == $currUserID) {
         
@@ -266,4 +302,14 @@ function checkIfFollowed($userID, $currUserID) {
     }
 }
 
+=======
+function editProfileUpdate($newUsername, $newFirstName, $newLastName, $newBiography, $userid){
+    
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $stmt = $conn -> prepare("UPDATE users SET biography = 'hellooo' ");
+    $stmt->bind_param("ssssi",$newUsername,$newFirstName,$newLastName,$newBiography,$userid);
+}
+>>>>>>> Stashed changes
 ?>
+
