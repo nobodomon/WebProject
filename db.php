@@ -63,9 +63,7 @@ function getUserFromID($id) {
     return $user;
 }
 
-<<<<<<< Updated upstream
-function getPostsRelatedToQuery($query) {
-=======
+
 /* 
  * Retrieve user details using username
  */
@@ -98,7 +96,6 @@ function getUserFromUsername($id){
 }
 
 function getPostsRelatedToQuery($query){
->>>>>>> Stashed changes
     $query = "%$query%";
     //Create database connection
     $config = parse_ini_file('../../private/db-config.ini');
@@ -170,7 +167,7 @@ function getPostByUser($userID) {
 function getCommentsForPost($postID){
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-    $stmt = $conn->prepare("SELECT * FROM comments WHERE postID = ? ORDER BY postedDate DESC");
+    $stmt = $conn->prepare("SELECT * FROM comments WHERE postID = ? ORDER BY postedDate DESC LIMIT 3");
     $stmt->bind_param("i", $postID);
     if (!$stmt->execute()) {
         return "No comments";
@@ -279,7 +276,6 @@ function checkIfLiked($postID,$userID){
         }
 }
 
-<<<<<<< Updated upstream
 function checkIfFollowed($userID, $currUserID) {
     if ($userID == $currUserID) {
         
@@ -302,7 +298,6 @@ function checkIfFollowed($userID, $currUserID) {
     }
 }
 
-=======
 function editProfileUpdate($newUsername, $newFirstName, $newLastName, $newBiography, $userid){
     
     $config = parse_ini_file('../../private/db-config.ini');
@@ -310,6 +305,5 @@ function editProfileUpdate($newUsername, $newFirstName, $newLastName, $newBiogra
     $stmt = $conn -> prepare("UPDATE users SET biography = 'hellooo' ");
     $stmt->bind_param("ssssi",$newUsername,$newFirstName,$newLastName,$newBiography,$userid);
 }
->>>>>>> Stashed changes
 ?>
 

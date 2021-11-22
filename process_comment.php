@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 $postID = $_GET['postID'];
 $commentingUserID = $_SESSION['userID'];
@@ -15,9 +14,10 @@ $conn->close();
 
 
 
-$authorPageID = getAuthorOfPost($postID)['author_id'];
+$author= getAuthorOfPost($postID);
+$authorID = $author['author_id'];
 
-header("Location: profile.php?userID=$authorPageID")
+header("Location: profile.php?userID=$authorID")
 
 ?>
 
