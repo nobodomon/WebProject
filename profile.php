@@ -55,7 +55,7 @@ and open the template in the editor.
                             <div class="mt-3">
                                 <h4 class="font-13 text-uppercase">About Me :</h4>
                                 <p class="text-muted font-13 mb-3">
-                                    To be implemented, short desc.
+                                    <?php echo $viewingUser['bio'] ?>
                                 </p>
                                 <p class="text-muted mb-2 font-13"><strong>Full Name :</strong> <span class="ms-2"><?php echo $viewingUser['fname'] . ' ' . $viewingUser['lname']; ?></span></p>
                             </div>                                    
@@ -190,6 +190,8 @@ and open the template in the editor.
                                                     <form method="post" action="process_comment.php?postID=<?php echo $row[0] ?>">
                                                         <div class="w-100">
                                                             <input type="text" id="comment" name="comment" class="form-control border-0 form-control-sm" placeholder="Add comment">
+                                                        </div>
+                                                        <div class="w-100">
                                                             <button type="submit" name="_submit" class="btn" value='Submit'>Submit</button>
                                                         </div>
                                                     </form>
