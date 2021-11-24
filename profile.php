@@ -104,6 +104,12 @@
                                         <textarea rows="3" class="form-control" id="content" name="content" placeholder="Write something..."></textarea>
                                     </span>
                                     <div class="comment-area-btn">
+                                        <label for="postType">Post Privacy: </label>
+                                        <select id="postType" name="postType">
+                                            <option value="0">Public</option>
+                                            <option value="1">Followers Only</option>
+                                            <option value="2">Subscribers only</option>
+                                        </select>
                                         <div class="float-end">
                                             <button type="submit" class="btn btn-sm btn-dark waves-effect waves-light">Post</button>
                                         </div>

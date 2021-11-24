@@ -1,5 +1,5 @@
 <?php
-    $followerID = $_GET['followerID'];
+    $currUserID = $_GET['followerID'];
     session_start();
     if(empty($_SESSION['userID'])){
         $errorMsg = "Please login first.";
@@ -8,11 +8,11 @@
         
     }
     follow($followerID, $_SESSION['userID']);
-    function follow($followerID,$currUserID){
+    function follow($currUserID,$subscriberID){
         $config = parse_ini_file('../../private/db-config.ini');
         $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-        $stmt = $conn ->prepare("SELECT count(*) AS count FROM followers WHERE userID = ? AND followerID = ?");
-        $stmt->bind_param("ii", $followerID, $currUserID);
+        $stmt = $conn ->prepare("SELECT count(*) AS count FROM subscribers WHERE userID = ? AND subscriberID = ?");
+        $stmt->bind_param("ii", $currUserID, $subscriberID);
         $stmt->execute();
         $rows = $stmt->get_result()->fetch_row()[0];
         $stmt->close();
@@ -21,20 +21,20 @@
         {
             //if follower record doesn't exist, insert follow record
             $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-            $stmt = $conn -> prepare("INSERT INTO followers (userID, followerID) VALUES (?,?)");
-            $stmt->bind_param("ii",$followerID,$currUserID);
+            $stmt = $conn -> prepare("INSERT INTO subscribers (userID, subscriberID) VALUES (?,?)");
+            $stmt->bind_param("ii",$currUserID,$subscriberID);
             $stmt->execute();
             $stmt->close();
             $conn->close();
         }else{
             //if follower record exist, do unfollow.
             $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-            $stmt = $conn -> prepare("DELETE FROM followers where userID = ? AND followerID = ?");
-            $stmt->bind_param("ii",$followerID,$currUserID);
+            $stmt = $conn -> prepare("DELETE FROM subscribers where userID = ? AND subscriberID = ?");
+            $stmt->bind_param("ii",$currUserID,$subscriberID);
             $stmt->execute();
             $stmt->close();
             $conn->close();
         }
-        header("Location: profile.php?userID=$followerID");
+        header("Location: profile.php?userID=$currUserID");
     }
  ?>
