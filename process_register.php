@@ -18,6 +18,10 @@
             $username = sanitize_input($_POST["username"]);
             $lname = sanitize_input($_POST["lname"]);
             $fname = sanitize_input($_POST["fname"]);
+            $interest1 = ($_POST["int1"]);
+            $interest2 = ($_POST["int2"]);
+            $interest3 = ($_POST["int3"]);
+            $interest = $interest1  .' ,'.$interest2 .' , '.$interest3;
             // Check if password and confirm passwords are the same
             if ($_POST["pwd"] === $_POST["pwd_confirm"]) {
                 $pwd = password_hash($_POST["pwd"], PASSWORD_DEFAULT);
@@ -27,7 +31,7 @@
             }
             // Additional check to make sure e-mail address is well  -formed.
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errorMsg = $errorMsg . "Inva   lid email format.<br>";
+                $errorMsg = $errorMsg . "Invalid email format.<br>";
                 $success = false;
             }
         }
@@ -77,11 +81,11 @@
                 $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
             }else{
                 //Prepare the statement:
-                $stmt = $conn -> prepare("INSERT INTO users (username, fname, lname, email, password) VALUES (?,?,?,?,?)");
+                $stmt = $conn -> prepare("INSERT INTO users (username, fname, lname, email, password, interest) VALUES (?,?,?,?,?,?)");
                 
                 //Bind & Execute the query statement:
                 $pwd_hashed = $pwd;
-                $stmt-> bind_param("sssss", $username, $fname, $lname, $email, $pwd_hashed);
+                $stmt-> bind_param("sssss", $username, $fname, $lname, $email, $pwd_hashed, $interest);
                 if(!$stmt-> execute()){
                     $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
                     $success = false;
@@ -93,7 +97,7 @@
                     
                     $h3 = "<h3>Your Registration successful!</h3>";
                     $h4 = "<h4>Thank you for signing up, ". $lname . " " . $fname ."</h4>";
-                    $btn = "<a href='#'><button class = 'btn btn-success'>Log-in </button></a><br>";
+                    $btn = "<a href='login.php'><button class = 'btn btn-success'>Log-in </button></a><br>";
                 }
                 $stmt->close();
                 

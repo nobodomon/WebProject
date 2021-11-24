@@ -14,7 +14,7 @@
                         <div class="text-center">
                             <h3 class="text-primary">Register</h3>
                         </div>
-                        <form action="process_login.php" method="post">
+                        <form action="process_register.php" method="post">
                             <div class="p-4">
                                 <div class="input-group mb-3">
                                     <span class="input-group-text bg-primary"><i
@@ -45,6 +45,21 @@
                                     <span class="input-group-text bg-primary"><i
                                             class="bi bi-key-fill text-white"></i></span>
                                     <input class="form-control" type="password" id="pwd_confirm" name="pwd_confirm" required placeholder="Confirm password">
+                                </div>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text bg-primary"><i
+                                            class="bi bi-book text-white"></i></span>
+                                    <input class="form-control" type="interest" id="int1" name="int1" required placeholder="Insert your first interest(if any)">
+                                </div>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text bg-primary"><i
+                                            class="bi bi-book text-white"></i></span>
+                                    <input class="form-control" type="interest" id="int2" name="int2" required placeholder="Insert your second interest(if any)">
+                                </div>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text bg-primary"><i
+                                            class="bi bi-book text-white"></i></span>
+                                    <input class="form-control" type="interest" id="int3" name="int3" required placeholder="Insert your third interest(if any)">
                                 </div>
 
                                 <div class="form-check">
