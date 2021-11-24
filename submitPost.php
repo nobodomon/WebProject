@@ -1,4 +1,5 @@
-<html>
+<!doctype html>
+<html lang="en">
     <?php
     include "head.inc.php"
     ?>
@@ -36,6 +37,8 @@
         
         function createPost(){
             global $success,$errorMsg, $title, $content;
+            
+            $sanitizedContent = htmLawed($content);
             $config = parse_ini_file('../../private/db-config.ini');
             $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
             if($conn->connect_error){
@@ -51,7 +54,7 @@
 
                 //Bind & Execute the query statement:
                 $dateTimeNow = date_create()->format('Y-m-d H:i:s');
-                $stmt-> bind_param("isss", $_SESSION["userID"], $title, $content,$dateTimeNow);
+                $stmt-> bind_param("isss", $_SESSION["userID"], $title, $sanitizedContent,$dateTimeNow);
                 if(!$stmt->execute()){
                     $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
                     $success = false;

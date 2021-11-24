@@ -1,6 +1,7 @@
-<html>
+<!doctype html>
+<html lang="en">
     <?php
-        include "head.inc.php"
+    include "head.inc.php"
     ?>
     <body>
         <?php
@@ -14,7 +15,7 @@
                 </div>
                 <div class="form-group">
                     <label for="content">Content:</label>
-                    <input class="form-control" type="text" id="content" name="content" required placeholder="Enter content"> 
+                    <textarea id="content" name="content" placeholder="Enter your content here"></textarea>
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary" type="submit">Submit</button> 

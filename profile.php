@@ -1,12 +1,5 @@
-<!DOCTYPE html>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
-
-
-<html>
+<!doctype html>
+<html lang="en">
     <?php
     include "head.inc.php"
     ?>
@@ -20,13 +13,13 @@ and open the template in the editor.
         <div class="container">
             <div class="row">
                 <div class="col-xl-5">
-                    <div class="card">
+                    <section class="card" aria-labelledby="Profile Card">
                         <div class="card-body">
                             <?php
                             if ($userID == $_SESSION['userID']) {
                                 ?> 
                                 <div class="dropdown float-end">
-                                    <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-label="Profile options" aria-expanded="false">
                                         <i class="mdi mdi-dots-vertical"></i>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-end">
@@ -55,30 +48,24 @@ and open the template in the editor.
                             <div class="mt-3">
                                 <h4 class="font-13 text-uppercase">About Me :</h4>
                                 <p class="text-muted font-13 mb-3">
-                                    <?php echo $viewingUser['bio'] ?>
+                                    <?php echo $viewingUser['biography'] ?>
                                 </p>
                                 <p class="text-muted mb-2 font-13"><strong>Full Name :</strong> <span class="ms-2"><?php echo $viewingUser['fname'] . ' ' . $viewingUser['lname']; ?></span></p>
                             </div>                                    
 
                             <ul class="social-list list-inline mt-3 mb-0">
                                 <li class="list-inline-item">
-                                    <a href="javascript: void(0);" class="social-list-item text-center border-primary text-primary"><i class="mdi mdi-facebook"></i></a>
+                                    <a href="javascript: void(0);" class="social-list-item text-center border-primary text-primary" aria-label="Facebook"><i class="mdi mdi-facebook"></i></a>
                                 </li>
                                 <li class="list-inline-item">
-                                    <a href="javascript: void(0);" class="social-list-item text-center border-danger text-danger"><i class="mdi mdi-google"></i></a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a href="javascript: void(0);" class="social-list-item text-center border-info text-info"><i class="mdi mdi-twitter"></i></a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a href="javascript: void(0);" class="social-list-item text-center border-secondary text-secondary"><i class="mdi mdi-github"></i></a>
+                                    <a href="javascript: void(0);" class="social-list-item text-center border-info text-info" aria-label="Twitter"><i class="mdi mdi-twitter"></i></a>
                                 </li>
                             </ul>   
                         </div>                                 
-                    </div> <!-- end card -->
+                    </section> <!-- end card -->
 
                     <!--To implement follower and subscriber count-->
-                    <div class="card">
+                    <section class="card" aria-labelledby="Profile statistics">
                         <div class="card-body text-center">
                             <div class="row">
                                 <div class="col-4 border-end border-light">
@@ -95,11 +82,11 @@ and open the template in the editor.
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                 </div> <!-- end col-->
 
                 <div class="col-xl-7">
-                    <div class="card">
+                    <section class="card" aria-labelledby="Posts">
                         <div class="card-body">
                             <!-- comment box -->
                             <?php
@@ -113,17 +100,12 @@ and open the template in the editor.
                                         <input class="form-control" type="text" id="title" name="title" required placeholder="Enter title"> 
                                     </div>
                                     <span class="input-icon">
+                                        <label for="content">Content:</label>
                                         <textarea rows="3" class="form-control" id="content" name="content" placeholder="Write something..."></textarea>
                                     </span>
                                     <div class="comment-area-btn">
                                         <div class="float-end">
                                             <button type="submit" class="btn btn-sm btn-dark waves-effect waves-light">Post</button>
-                                        </div>
-                                        <div>
-                                            <a href="#" class="btn btn-sm btn-light text-black-50"><i class="far fa-user"></i></a>
-                                            <a href="#" class="btn btn-sm btn-light text-black-50"><i class="fa fa-map-marker-alt"></i></a>
-                                            <a href="#" class="btn btn-sm btn-light text-black-50"><i class="fa fa-camera"></i></a>
-                                            <a href="#" class="btn btn-sm btn-light text-black-50"><i class="far fa-smile"></i></a>
                                         </div>
                                     </div>
                                 </form>
@@ -143,19 +125,47 @@ and open the template in the editor.
                                     ?>
 
                                     <div class="border border-light p-2 mb-3">
-                                        <div class="d-flex align-items-start">
+                                        <?php
+                                        if ($row[1] == $_SESSION['userID']) {
+                                            ?>
+                                            <div class="dropdown float-end">
+                                                <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Post Options">
+                                                    <i class="mdi mdi-dots-vertical"></i>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                    <!-- item-->
+                                                    <a href="process_delete.php?postID=<?php echo $row[0] ?>" class="dropdown-item">Delete Post</a>
+                                                    <!-- item-->
+                                                    <a href="editPost.php" class="dropdown-item">Edit Post</a>
+                                                </div>
+                                            </div>
+                                            <?php
+                                        }
+                                        ?>
+                                        <div class="d-flex align-items-start" aria-labelledby="postContent">
                                             <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
                                             <div class="w-100">
                                                 <h5 class=""><a href="#" class="link-dark"><?php echo $row[2] ?>   </a> <small class="text-muted"><?php echo time_elapsed_string($row[4]) ?></small></h5>
-                                                <p class="card-text"></p>
-                                                <div class="">
-                                                    <?php echo $row[3] ?>
+                                                <p class="card-text">
+                                                <?php echo $row[3] ?></p>
+                                                <div class="d-flex">
                                                     <br>
-                                                    <a href="process_like.php?postID=<?php echo $row[0] ?>" class="d-inline-block mt-2">
+                                                    <a href="process_like.php?postID=<?php echo $row[0] ?>" class="d-inline-block mt-2 nav-link d-flex align-items-center" aria-label="Like this post">
                                                         <?php
+                                                        $likes = getLikesForPost($row[0]);
+                                                        $likeOrLikes = ($likes == 1) ? "Like" : "Likes";
                                                         echo checkIfLiked($row[0], $_SESSION['userID']);
-                                                        echo "(" . getLikesForPost($row[0]) . ")";
+                                                        echo "&nbsp;(" . $likes . ' ' . $likeOrLikes . ")";
                                                         ?> 
+                                                    </a>
+                                                    <a href="#<?php echo $row[0] ?>" class="d-inline-block mt-2 commentToggle nav-link d-flex align-items-center" aria-label="Show/Hide Comments">
+                                                        <span class='material-icons'>chat_bubble_outline</span>
+                                                        <span>
+                                                            <?php
+                                                            $commentCount = getCommentCountForPost($row[0]);
+                                                            $commentOrComments = ($commentCount == 1) ? "Comment" : "Comments";
+                                                            echo "&nbsp;(" . $commentCount . " " . $commentOrComments . ")";
+                                                            ?> </span>
                                                     </a>
                                                 </div>
                                                 <hr>
@@ -168,7 +178,7 @@ and open the template in the editor.
                                             
                                         } else {
                                             ?>
-                                            <div class="post-user-comment-box">
+                                            <div class="post-user-comment-box" aria-labelledby="postComments">
                                                 <?php
                                                 while ($commentRows = $comments->fetch_array(MYSQLI_NUM)) {
                                                     $commentingUser = getUserFromID($commentRows[2]);
@@ -187,13 +197,9 @@ and open the template in the editor.
                                                     <a class="pe-2" href="#">
                                                         <img src="https://bootdey.com/img/Content/avatar/avatar1.png" class="rounded-circle" alt="Generic placeholder image" height="31">
                                                     </a>
-                                                    <form method="post" action="process_comment.php?postID=<?php echo $row[0] ?>">
-                                                        <div class="w-100">
-                                                            <input type="text" id="comment" name="comment" class="form-control border-0 form-control-sm" placeholder="Add comment">
-                                                        </div>
-                                                        <div class="w-100">
-                                                            <button type="submit" name="_submit" class="btn" value='Submit'>Submit</button>
-                                                        </div>
+                                                    <form class="d-flex" method="post" action="process_comment.php?postID=<?php echo $row[0] . '&userID=' . $row[1] ?>">
+                                                        <input type="text" id="comment" name="comment" class="form-control border-0 form-control-sm me-2" required placeholder="Add comment">
+                                                        <button type="submit" name="_submit" class="btn btnoutline-primary" value='Submit'>Submit</button>
                                                     </form>
                                                 </div>
                                             </div>
@@ -201,20 +207,20 @@ and open the template in the editor.
                                         }
                                         ?>
                                     </div>
-                                        <?php
-                                    }
+                                    <?php
                                 }
-                                ?>
-                            </div> <!-- end card-->
+                            }
+                            ?>
+                        </div> <!-- end card-->
 
-                        </div> <!-- end col -->
-                    </div>
-                    <!-- end row-->
+                    </section> <!-- end col -->
                 </div>
+                <!-- end row-->
             </div>
         </div>
-        <?php
-        include "footer.inc.php"
-        ?>
-    </body>
+    </div>
+    <?php
+    include "footer.inc.php"
+    ?>
+</body>
 </html>

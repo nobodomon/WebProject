@@ -31,5 +31,4 @@
         }
         header("Location: profile.php?userID=$followerID");
     }
-    
  ?>

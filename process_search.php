@@ -1,4 +1,5 @@
-<html>
+<!doctype html>
+<html lang="en">
     <?php
     include 'head.inc.php';
     $query = $_POST["query"];
@@ -6,8 +7,6 @@
     <body>
         <?php
         include 'nav.inc.php';
-        $userResults = getUserByUserName($query);
-        $postResults = getPostsRelatedToQuery($query);
         ?>
         <main class ="container">
             <!-- Tabs navs -->
@@ -21,11 +20,13 @@
                 </li>
             </ul>
             <!-- Tabs navs -->
-
+            
             <!-- Tabs content -->
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                     <?php
+                    $userResults = getUserByUserName($query);
+                    $postResults = getPostsRelatedToQuery($query);
                     while ($userRows = $userResults->fetch_array(MYSQLI_NUM)) {
                         ?>
 
@@ -33,10 +34,8 @@
                             <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
                             <div class="w-100">
                                 <h5 class=""><?php echo $userRows[1] ?></h5>
-                                <p class="card-text"></p>
-                                <div class="">
-                                    <?php echo $userRows[2] . " " . $userRows[3] ?>
-                                </div>
+                                <p class="card-text">
+                                    <?php echo $userRows[2] . " " . $userRows[3] ?></p>
                                 <a href="profile.php?userID=<?php echo $userRows[0]?>"class="btn btn-primary">View user</a>
                             </div>
                         </div>
@@ -53,11 +52,9 @@
                         <div class="d-flex align-items-start">
                             <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
                             <div class="w-100">
-                                <h5 class=""><?php echo $postRows[2] ?><small class="text-muted"><?php echo $postRows[4] ?></small></h5>
-                                <p class="card-text"></p>
-                                <div class="">
-                                    <?php echo $postRows[3] ?>
-                                </div>
+                                <h5 class=""><?php echo $postRows[2] ?><small class="text-muted"><?php echo time_elapsed_string($row[4]) ?></small></h5>
+                                <p class="card-text">
+                                    <?php echo $postRows[3] ?></p>
                                 <a href="#" class="btn btn-primary">View Post</a>
                             </div>
                         </div>

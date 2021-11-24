@@ -12,10 +12,7 @@ $stmt->execute();
 $stmt->close();
 $conn->close();
 
-
-
-$author= getAuthorOfPost($postID);
-$authorID = $author['author_id'];
+$authorID = $_GET['userID'];
 
 header("Location: profile.php?userID=$authorID")
 

@@ -36,6 +36,10 @@ function time_elapsed_string($datetime, $full = false) {
     return $string ? implode(', ', $string) . ' ago' : 'just now';
 }
 
+function getHomePagePosts($userID){
+    
+}
+
 function getUserFromID($id) {
     //Create database connection
     $config = parse_ini_file('../../private/db-config.ini');
@@ -63,39 +67,38 @@ function getUserFromID($id) {
     return $user;
 }
 
-
-/* 
+/*
  * Retrieve user details using username
  */
-function getUserFromUsername($id){
+
+function getUserFromUsername($id) {
     //Create database connection
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
 
     // Check connection
-    if($conn->connect_error){
-        $errorMsg = "Connection failed: " . $conn -> connect_error;
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
         $success = false;
-    }else{
+    } else {
         //Prepare the statement:
-        $stmt = $conn -> prepare("SELECT * FROM users WHERE username =?");
+        $stmt = $conn->prepare("SELECT * FROM users WHERE username =?");
         //Bind & Execute the query statement:
-        $stmt->bind_param("i",$id);
-        if(!$stmt-> execute()){
+        $stmt->bind_param("i", $id);
+        if (!$stmt->execute()) {
             $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
             $success = false;
-        }else{
+        } else {
             $result = $stmt->get_result();
             $user = $result->fetch_assoc();
         }
         $stmt->close();
-
     }
     $conn->close();
     return $user;
 }
 
-function getPostsRelatedToQuery($query){
+function getPostsRelatedToQuery($query) {
     $query = "%$query%";
     //Create database connection
     $config = parse_ini_file('../../private/db-config.ini');
@@ -164,7 +167,7 @@ function getPostByUser($userID) {
     }
 }
 
-function getCommentsForPost($postID){
+function getCommentsForPost($postID) {
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
     $stmt = $conn->prepare("SELECT * FROM comments WHERE postID = ? ORDER BY postedDate DESC LIMIT 3");
@@ -177,7 +180,8 @@ function getCommentsForPost($postID){
         return $result;
     }
 }
-function getAuthorOfPost($postID){
+
+function getAuthorOfPost($postID) {
     //Create database connection
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
@@ -203,18 +207,32 @@ function getAuthorOfPost($postID){
     $conn->close();
     return $user;
 }
+
 function getPostByID($postID) {
+    global $success,$errorMsg;
+    (int)$postID;
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-    $stmt = $conn->prepare("SELECT * FROM post WHERE post_id = ?");
-    $stmt->bind_param("i", $postID);
-    if (!$stmt->execute()) {
-        return "No post";
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+        return $errorMsg;
     } else {
-
-        $result = $stmt->get_result();
-        return $result;
+        $stmt = $conn->prepare("SELECT * FROM post WHERE post_id =:postID");
+        $stmt->bindParam(":postID", $postID);
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+            return $errorMsg;
+        } else {
+            $result = $stmt->get_result();
+            $post = $result->fetch_assoc();
+        }
+        $stmt->close();
     }
+    
+    $conn->close();
+    return $post;
 }
 
 function getFollowerCount($userID) {
@@ -256,24 +274,37 @@ function getLikesForPost($postID) {
     return $rows;
 }
 
-function checkIfLiked($postID,$userID){
+function getCommentCountForPost($postID) {
+
     $config = parse_ini_file('../../private/db-config.ini');
-        $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-        $stmt = $conn ->prepare("SELECT count(*) FROM likes WHERE postID = ? AND likeUserID = ?");
-        $stmt->bind_param("ii", $postID, $userID);
-        $stmt->execute();
-        $rows = $stmt->get_result()->fetch_row()[0];
-        
-        $stmt->close();
-        $conn->close();
-        if($rows == 0)
-        {
-            //if follower record doesn't exist, insert follow record
-            return '<span class="material-icons">favorite_border</span>';
-        }else{
-            //if follower record exist, do unfollow.
-            return '<span class="material-icons">favorite</span>';
-        }
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $sql = 'select count(*) from comments WHERE postID =?';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $postID);
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_row()[0];
+    $stmt->close();
+    $conn->close();
+    return $rows;
+}
+
+function checkIfLiked($postID, $userID) {
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $stmt = $conn->prepare("SELECT count(*) FROM likes WHERE postID = ? AND likeUserID = ?");
+    $stmt->bind_param("ii", $postID, $userID);
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_row()[0];
+
+    $stmt->close();
+    $conn->close();
+    if ($rows == 0) {
+        //if follower record doesn't exist, insert follow record
+        return '<span class="material-icons">favorite_border</span>';
+    } else {
+        //if follower record exist, do unfollow.
+        return '<span class="material-icons">favorite</span>';
+    }
 }
 
 function checkIfFollowed($userID, $currUserID) {
@@ -298,12 +329,12 @@ function checkIfFollowed($userID, $currUserID) {
     }
 }
 
-function editProfileUpdate($newUsername, $newFirstName, $newLastName, $newBiography, $userid){
-    
+function editProfileUpdate($newUsername, $newFirstName, $newLastName, $newBiography, $userid) {
+
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-    $stmt = $conn -> prepare("UPDATE users SET biography = 'hellooo' ");
-    $stmt->bind_param("ssssi",$newUsername,$newFirstName,$newLastName,$newBiography,$userid);
+    $stmt = $conn->prepare("UPDATE users SET biography = 'hellooo' ");
+    $stmt->bind_param("ssssi", $newUsername, $newFirstName, $newLastName, $newBiography, $userid);
 }
 ?>
 

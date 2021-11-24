@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 
+
 $(document).ready(function () {
     var toggled = false;
     $('.img-thumbnail').click(function () {
@@ -22,6 +23,21 @@ $(document).ready(function () {
         }
     }
     );
+
+
+    var commentToggle = true;
+    $('.commentToggle').click(function () {
+        if (commentToggle) {
+            $(this).parent().parent().parent().next().css("display", "block")
+            $(this).children("span:first").text("chat_bubble")
+            commentToggle = false;
+        } else {
+            $(this).parent().parent().parent().next().css("display", "none")
+            $(this).children("span:first").text("chat_bubble_outline")
+            commentToggle = true;
+        }
+    });
+
     activateMenu()
     //$('.img-thumbnail').hover(function () {
     //alert("You are hovering over "+ this.alt)
@@ -41,4 +57,5 @@ $(document).ready(function () {
     }
     ;
     $('.nav-link').click(activateMenu());
+
 });
