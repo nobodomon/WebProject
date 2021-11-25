@@ -47,19 +47,11 @@
                                     <span class="input-group-text bg-primary text-white"><i
                                             class="bi bi-bookmark-heart"></i>  Interests</span>
                                 </div>
-                                <?php
-                                    for ($i = 1; $i <= sizeof($$categoriesResults); $i++) {
-                                        echo $$categoriesResults[$i];
-                                    }
-                                ?>
-                                <input type="checkbox" class="btn-check" id="btn-check" autocomplete="off" />
-                                <label class="btn btn-outline-dark" for="btn-check">Interest 1</label>
+                                <?php while($row = $categoriesResults -> fetch_array(MYSQLI_NUM)){ ?>
+                                    <input type="checkbox" class="btn-check" id="btn-check" autocomplete="off" />
+                                    <label class="btn btn-outline-dark" for="btn-check" value="<?php echo $row[1]; ?>"></label>
+                                <?php } ?>
 
-                                <input type="checkbox" class="btn-check" id="btn-check2" autocomplete="off" />
-                                <label class="btn btn-outline-dark" for="btn-check2">Interest 2</label>
-
-                                <input type="checkbox" class="btn-check" id="btn-check3" autocomplete="off" />
-                                <label class="btn btn-outline-dark" for="btn-check3">Interest 3</label>
                                 <br>
                                 <button class="btn btn-primary text-center mt-2" type="submit">
                                     Submit
