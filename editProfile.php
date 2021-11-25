@@ -17,28 +17,45 @@
                         <div class="text-center">
                             <h3 class="text-primary">Edit Profile</h3>
                         </div>
-                        <form action="process_login.php" method="post">
+                        <form action="process_editProfile.php" method="post">
                             <div class="p-4">
                                 <div class="input-group mb-3">
                                     <span class="input-group-text bg-primary text-white"><i
-                                            class="bi bi-person text-white"></i> First Name</span>
+                                            class="bi bi-person text-white"></i>  First Name</span>
                                     <input class="form-control" type="text" id="fname" name="fname" value="<?php echo $userResults['fname']; ?>">
                                 </div>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text bg-primary text-white"><i
-                                            class="bi bi-person text-white"></i> Last Name</span>
+                                            class="bi bi-person text-white"></i>  Last Name</span>
                                     <input class="form-control" type="text" id="lname" name="lname" value="<?php echo $userResults['lname']; ?>">
                                 </div>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text bg-primary text-white"><i
-                                            class="bi bi-person text-white"></i> Username</span>
+                                            class="bi bi-person text-white"></i>  Username</span>
                                     <input class="form-control" type="text" id="username" name="username" value="<?php echo $userResults['username']; ?>">
                                 </div>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text bg-primary text-white"><i
-                                            class="bi bi-key-fill text-white"></i> Biography</span>
+                                            class="bi bi-key-fill text-white"></i>  Biography</span>
                                     <input class="form-control" type="text" id="biography" name="biography" value="<?php echo $userResults['biography']; ?>">
                                 </div>
+                                <div class="input-group mb-3">
+                                    <a href="editprofilepicture.php"><span class="text-primary">Change Profile Picture</span></a>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text bg-primary text-white"><i
+                                            class="bi bi-bookmark-heart"></i>  Interests</span>
+                                </div>
+
+                                <input type="checkbox" class="btn-check" id="btn-check" autocomplete="off" />
+                                <label class="btn btn-outline-dark" for="btn-check">Interest 1</label>
+
+                                <input type="checkbox" class="btn-check" id="btn-check2" autocomplete="off" />
+                                <label class="btn btn-outline-dark" for="btn-check2">Interest 2</label>
+
+                                <input type="checkbox" class="btn-check" id="btn-check3" autocomplete="off" />
+                                <label class="btn btn-outline-dark" for="btn-check3">Interest 3</label>
+                                <br>
                                 <button class="btn btn-primary text-center mt-2" type="submit">
                                     Submit
                                 </button>
