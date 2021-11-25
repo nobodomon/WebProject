@@ -37,7 +37,18 @@ $(document).ready(function () {
             commentToggle = true;
         }
     });
-
+    var commentToggleViewPost = false;
+        $('.commentToggleViewPost').click(function () {
+            if (commentToggleViewPost) {
+                $(this).parent().parent().parent().next().css("display", "block")
+                $(this).children("span:first").text("chat_bubble")
+                commentToggleViewPost = false;
+            } else {
+                $(this).parent().parent().parent().next().css("display", "none")
+                $(this).children("span:first").text("chat_bubble_outline")
+                commentToggleViewPost = true;
+            }
+        });
     activateMenu()
     //$('.img-thumbnail').hover(function () {
     //alert("You are hovering over "+ this.alt)

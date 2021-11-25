@@ -16,6 +16,7 @@
         } else {
             $title = $_POST['title'];
             $content = $_POST['content'];
+            $postType = $_POST['postType'];
         }
         if ($success) {
             //$h3 = "<h3>Your Registration successful!</h3>";
@@ -36,7 +37,7 @@
         }
         
         function createPost(){
-            global $success,$errorMsg, $title, $content;
+            global $success,$errorMsg, $title, $content, $postType;
             
             $sanitizedContent = htmLawed($content);
             $config = parse_ini_file('../../private/db-config.ini');
@@ -50,11 +51,11 @@
                 $errors = "<p>" . $errorMsg . "</p>";
                 $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
             }else{
-                $stmt = $conn -> prepare("INSERT INTO post (author_id, title, content,postedDateTime) VALUES (?,?,?,?)");
+                $stmt = $conn -> prepare("INSERT INTO post (author_id, title, content, postedDateTime, postType) VALUES (?,?,?,?,?)");
 
                 //Bind & Execute the query statement:
                 $dateTimeNow = date_create()->format('Y-m-d H:i:s');
-                $stmt-> bind_param("isss", $_SESSION["userID"], $title, $sanitizedContent,$dateTimeNow);
+                $stmt-> bind_param("isssi", $_SESSION["userID"], $title, $sanitizedContent,$dateTimeNow, $postType);
                 if(!$stmt->execute()){
                     $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
                     $success = false;

@@ -29,7 +29,6 @@
             //$h4 = "<h4>Thank you for signing up, ". $_POST["lname"]. " " . $_POST["fname"] ."</h4>";
             //$btn = "<a href='#'><button class = 'btn btn-success'>Log-in </button></a><br>";
             retrieveMemberFromDB();
-
         } else {
             $h3 = "<h3>Oops!";
             $h4 = "<h4>The following input errors were detected:</h4>";
@@ -44,83 +43,81 @@
             $data = htmlspecialchars($data);
             return $data;
         }
-        
-        function retrieveMemberFromDB(){
-            global $userID, $email,$pwd, $lname, $fname, $h3, $h4, $btn, $errorMsg, $success;
-            
+
+        function retrieveMemberFromDB() {
+            global $userID, $email, $pwd, $lname, $fname, $h3, $h4, $btn, $errorMsg, $success;
+
             //Create database connection
             $config = parse_ini_file('../../private/db-config.ini');
             $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-            
+
             // Check connection
-            if($conn->connect_error){
-                $errorMsg = "Connection failed: " . $conn -> connect_error;
+            if ($conn->connect_error) {
+                $errorMsg = "Connection failed: " . $conn->connect_error;
                 $success = false;
-                
+
                 $h3 = "<h3>Oops!";
                 $h4 = "<h4>The following input errors were detected:</h4>";
                 $errors = "<p>" . $errorMsg . "</p>";
                 $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
-            }else{
+            } else {
                 //Prepare the statement:
-                $stmt = $conn -> prepare("SELECT * FROM users WHERE email =?");
+                $stmt = $conn->prepare("SELECT * FROM users WHERE email =?");
                 //Bind & Execute the query statement:
-                $stmt->bind_param("s",$email);
-                if(!$stmt-> execute()){
+                $stmt->bind_param("s", $email);
+                if (!$stmt->execute()) {
                     $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
                     $success = false;
                     $h3 = "<h3>Oops!";
                     $h4 = "<h4>The following errors were detected:</h4>";
                     $errorMsg = "<p>" . $errorMsg . "</p>";
                     $btn = "<a href='login.php'><button class='btn btn-warning'>Return to login </button></a><br>";
-                }else{
+                } else {
                     $result = $stmt->get_result();
                     $user = $result->fetch_assoc();
-                    if(password_verify($pwd,$user["password"])){
+                    if (password_verify($pwd, $user["password"])) {
                         $lname = $user['lname'];
                         $fname = $user['fname'];
                         $h3 = "<h3>Login successful!</h3>";
                         $h4 = "<h4>Welcome back," . $lname . " " . $fname . ".</h4>";
                         $btn = "<a href='index.php'><button class = 'btn btn-success'>Return to Home</button></a><br>";
-                        session_start();
                         $userID = $user['userID'];
+                        if (!isset($_SESSION)) {
+                            session_start();
+                        }
                         $_SESSION["userID"] = $user['userID'];
                         $_SESSION["fname"] = $user['fname'];
                         $_SESSION["lname"] = $user['lname'];
-                    }else{
+                    } else {
                         $h3 = "<h3>Oops!</h3>";
                         $h4 = "<h4>The following errors were detected:</h4>";
                         $errorMsg = "<p> Email not found or password doesn't match...</p>";
                         $btn = "<a href ='login.php'><button class = 'btn btn-warning'>Return to login</button></a><br>";
                         $success = false;
                     }
-                    
                 }
                 $stmt->close();
-                
             }
             $conn->close();
             return $success;
         }
-        
-        
         ?>
         <main class="container">
             <hr>
-                <?php
-                    echo $h3;
-                    echo $h4;
-                    if (empty($errorMsg)){
-                    }else{
-                        echo $errorMsg;
-                    }
-                    echo $btn;
-                    header("Refresh:5; url=profile.php?userID=$userID");
-                ?>
+        <?php
+        echo $h3;
+        echo $h4;
+        if (empty($errorMsg)) {
+            
+        } else {
+            echo $errorMsg;
+        }
+        echo $btn;
+        ?>
             <br>
         </main>
-        <?php
-        include "footer.inc.php"
-        ?>
+            <?php
+            include "footer.inc.php"
+            ?>
     </body>
 </html>

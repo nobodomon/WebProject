@@ -8,6 +8,7 @@
         include "nav.inc.php";
         // get current user details
         $userResults = getUserFromID($_SESSION['userID']);
+        $categoriesResults = getAllCategories();
         ?>
 
         <main class="container-fluid vh-100" style="margin-top:100px">
@@ -46,7 +47,11 @@
                                     <span class="input-group-text bg-primary text-white"><i
                                             class="bi bi-bookmark-heart"></i>  Interests</span>
                                 </div>
-
+                                <?php
+                                    for ($i = 1; $i <= sizeof($$categoriesResults); $i++) {
+                                        echo $$categoriesResults[$i];
+                                    }
+                                ?>
                                 <input type="checkbox" class="btn-check" id="btn-check" autocomplete="off" />
                                 <label class="btn btn-outline-dark" for="btn-check">Interest 1</label>
 

@@ -25,40 +25,67 @@
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                     <?php
+                    $userSearchSuccess;
+                    $userSearchErrorMsg;
                     $userResults = getUserByUserName($query);
+                    $postSearchSuccess;
+                    $postSearchErrorMsg;
                     $postResults = getPostsRelatedToQuery($query);
-                    while ($userRows = $userResults->fetch_array(MYSQLI_NUM)) {
-                        ?>
+                    if ($userSearchSuccess == true) {
+                        if ($userResults->num_rows > 0) {
+                            while ($userRows = $userResults->fetch_array(MYSQLI_NUM)) {
+                                ?>
 
-                        <div class="d-flex align-items-start">
-                            <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
-                            <div class="w-100">
-                                <h5 class=""><?php echo $userRows[1] ?></h5>
-                                <p class="card-text">
-                                    <?php echo $userRows[2] . " " . $userRows[3] ?></p>
-                                <a href="profile.php?userID=<?php echo $userRows[0]?>"class="btn btn-primary">View user</a>
-                            </div>
-                        </div>
-                        <?php
+                                <div class="d-flex align-items-start">
+                                    <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
+                                    <div class="w-100">
+                                        <h5 class=""><?php echo $userRows[1] ?></h5>
+                                        <p class="card-text">
+                                            <?php echo $userRows[2] . " " . $userRows[3] ?></p>
+                                        <a href="profile.php?userID=<?php echo $userRows[0]?>"class="btn btn-primary">View user</a>
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                        }
+                        else {
+                            echo "<p>No User Found</p>";
+                        }
+                        
+                    }
+                    else {
+                        echo "<h5>The following error were detected:</h5>";
+                        echo "<p>" . $userSearchErrorMsg . "</p>";
                     }
                     ?>
 
                 </div>
                 <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                     <?php
-                    while ($postRows = $postResults->fetch_array(MYSQLI_NUM)) {
-                        ?>
+                    if ($postSearchSuccess == true) {
+                        if ($postResults->num_rows > 0) {
+                            while ($postRows = $postResults->fetch_array(MYSQLI_NUM)) {
+                                ?>
 
-                        <div class="d-flex align-items-start">
-                            <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
-                            <div class="w-100">
-                                <h5 class=""><?php echo $postRows[2] ?><small class="text-muted"><?php echo time_elapsed_string($row[4]) ?></small></h5>
-                                <p class="card-text">
-                                    <?php echo $postRows[3] ?></p>
-                                <a href="#" class="btn btn-primary">View Post</a>
-                            </div>
-                        </div>
-                        <?php
+                                <div class="d-flex align-items-start">
+                                    <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
+                                    <div class="w-100">
+                                        <h5 class=""><?php echo $postRows[2] ?><small class="text-muted"><?php echo time_elapsed_string($postRows[4]) ?></small></h5>
+                                        <p class="card-text">
+                                            <?php echo $postRows[3] ?></p>
+                                        <a href="viewPost.php?postID=<?php echo $postRows[0]?>" class="btn btn-primary">View Post</a>
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                        }
+                        else {
+                            echo "<p>No Post Found</p>";
+                        }
+                    }
+                    else {
+                        echo "<h5>The following error were detected:</h5>";
+                        echo "<p>" . $postSearchErrorMsg . "</p>";
                     }
                     ?>
                 </div>
