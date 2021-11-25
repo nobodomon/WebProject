@@ -336,5 +336,32 @@ function editProfileUpdate($newUsername, $newFirstName, $newLastName, $newBiogra
     $stmt = $conn->prepare("UPDATE users SET biography = 'hellooo' ");
     $stmt->bind_param("ssssi", $newUsername, $newFirstName, $newLastName, $newBiography, $userid);
 }
+
+function getAllCategories() {
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+    } else {
+        //Prepare the statement:
+        $stmt = $conn->prepare("SELECT * FROM categories");
+        //Bind & Execute the query statement:
+        $stmt->bind_param("i", $id);
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        } else {
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+        }
+        $stmt->close();
+    }
+    $conn->close();
+    return $user;
+}
 ?>
 
