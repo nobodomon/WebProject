@@ -17,11 +17,34 @@ $postID = $_GET["postID"];
             <div class="border border-light p-2 mb-3">
                 <?php
                 $postExist = checkIfPostExist($postID);
-                $post = getPostByID($postID);
-                $followed = checkIfFollowed($post["author_id"], $_SESSION["userID"]);
-                $postPrivacy = $post["postType"];
-                if (($postExist == true) && (($post["author_id"] == $_SESSION['userID']) || ($postPrivacy == 0 ) || ($postPrivacy == 1 && $followed))) {
-                    if ($post["author_id"] == $_SESSION['userID']) {
+                if ($postExist) {
+
+                    $post = getPostByID($postID);
+                    $postPrivacy = $post["postType"];
+                    if (!isset($_SESSION['userID'])) {
+                        $sessionUser = -1;
+                        $followed = false;
+                    } else {
+                        $sessionUser = $_SESSION['userID'];
+                        $followed = checkIfFollowed($post["author_id"], $_SESSION['userID']);
+                    }
+                }
+                if ($postExist == false) {
+                    ?>
+                    <div class="page-wrap d-flex flex-row align-items-center">
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-md-12 text-center">
+                                    <span class="display-1 d-block">Oops!</span>
+                                    <div class="mb-4 lead">The post was not found or you do not have the permissions to view this post.</div>
+                                    <a href="index.php" class="btn btn-link">Back to Home</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php
+                } else if (($postExist == true) && (($post["author_id"] == $sessionUser) || ($postPrivacy == 0 ) || ($postPrivacy == 1 && $followed))) {
+                    if ($post["author_id"] == $sessionUser) {
                         ?>
                         <div class="dropdown float-end">
                             <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Post Options">
@@ -40,16 +63,29 @@ $postID = $_GET["postID"];
                     <div class="d-flex align-items-start" aria-labelledby="postContent">
                         <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
                         <div class="w-100">
-                            <h5 class=""><a href="#" class="button two"><?php echo $post["title"] ?>   </a> <small class="text-muted"><?php echo time_elapsed_string($post["postedDateTime"]) ?></small></h5>
+                            <h5 class=""><a href="profile.php?userID=<?php echo $post["author_id"]?>" class="button four"><?php echo $post["title"] ?>   </a> <small class="text-muted"><?php echo time_elapsed_string($post["postedDateTime"]) ?></small></h5>
                             <p class="card-text">
                                 <?php echo $post["content"] ?></p>
                             <div class="d-flex">
                                 <br>
-                                <a href="process_like.php?postID=<?php echo $post["post_id"] . '&redirectTo=' . 1 ?>" class="button four d-inline-block mt-2 nav-link d-flex align-items-center" aria-label="Like this post">
+                                <?php
+                                if ($sessionUser == -1) {
+                                    $processLike = "login.php";
+                                } else {
+
+                                    $processLike = "process_like.php?postID=" . $post['post_id'];
+                                }
+                                ?>
+                                <a href="<?php echo $processLike?>" class="button four d-inline-block mt-2 nav-link d-flex align-items-center" aria-label="Like this post">
                                     <?php
                                     $likes = getLikesForPost($post["post_id"]);
                                     $likeOrLikes = ($likes == 1) ? "Like" : "Likes";
-                                    echo checkIfLiked($post["post_id"], $_SESSION['userID']);
+                                    if ($sessionUser == -1) {
+                                        echo '<span class="material-icons">favorite_border</span>';
+                                    } else {
+
+                                        echo checkIfLiked($post["post_id"], $sessionUser);
+                                    }
                                     echo "&nbsp;(" . $likes . ' ' . $likeOrLikes . ")";
                                     ?> 
                                 </a>
@@ -93,7 +129,7 @@ $postID = $_GET["postID"];
                                         <?php echo $commentRows[3] ?>
                                     </div>
                                     <?php
-                                    if ($currCommentingUser['userID'] == $userID) {
+                                    if ($currCommentingUser['userID'] == $sessionUser) {
                                         ?>
                                         <div class="dropdown float-end">
                                             <a href="#" class="dropdown-toggle arrow-none card-drop nav-link" data-bs-toggle="dropdown" aria-label="Profile options" aria-expanded="false">
@@ -112,12 +148,17 @@ $postID = $_GET["postID"];
                                 </div>
                                 <?php
                             }
+                            if ($sessionUser == -1) {
+                                $commentProcess = "login.php";
+                            } else {
+                                $commentProcess = 'process_comment.php?postID=$post["post_id"]' . '&userID=' . $post["author_id"] . '&redirectTo=' . 1;
+                            }
                             ?>
                             <div class="d-flex align-items-start mt-2">
                                 <a class="pe-2" href="#">
                                     <img src="https://bootdey.com/img/Content/avatar/avatar1.png" class="rounded-circle" alt="Generic placeholder image" height="31">
                                 </a>
-                                <form class="d-flex" method="post" action="process_comment.php?postID=<?php echo $post["post_id"] . '&userID=' . $post["author_id"] . '&redirectTo=' . 1 ?>">
+                                <form class="d-flex" method="post" action="<?php echo $commentProcess ?>">
                                     <input type="text" id="comment" name="comment" class="form-control border-0 form-control-sm me-2" required placeholder="Add comment">
                                     <button type="submit" name="_submit" class="btn btnoutline-primary" value='Submit'>Submit</button>
                                 </form>
@@ -125,20 +166,6 @@ $postID = $_GET["postID"];
                         </div>
                         <?php
                     }
-                } else {
-                    ?>
-                    <div class="page-wrap d-flex flex-row align-items-center">
-                        <div class="container">
-                            <div class="row justify-content-center">
-                                <div class="col-md-12 text-center">
-                                    <span class="display-1 d-block">Oops!</span>
-                                    <div class="mb-4 lead">The post was not found or you do not have the permissions to view this post.</div>
-                                    <a href="index.php" class="btn btn-link">Back to Home</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <?php
                 }
                 ?>
             </div>

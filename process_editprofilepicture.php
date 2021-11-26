@@ -15,7 +15,7 @@
                   //echo "<pre>", print_r($_FILES), "</pre>";
                   //echo "<pre>", print_r($_FILES['profileImage']), "</pre>";
                   $profileImagename = time() . '_' . $_FILES['profileImage']['name'];
-
+                  
                   $target = "images/" . $profileImagename;
 
                   if (move_uploaded_file($_FILES['profileImage']['tmp_name'], $target))

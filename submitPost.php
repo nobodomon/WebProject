@@ -84,7 +84,6 @@
                     }
                     echo $btn;
                     
-                    header('Refresh: 5; Location:profile.php');
                 ?>
             <br>
         </main>

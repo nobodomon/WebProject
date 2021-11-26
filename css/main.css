@@ -14,10 +14,6 @@ and open the template in the editor.
     filter:invert(100%);
 }
 
-h2{
-    text-decoration: underline;
-}
-
 figure>img{
     border: double grey;
     border-radius: 2px;
@@ -237,6 +233,69 @@ nav{
     }
     100% {
         transform: rotate(-2.5deg);
+    }
+
+}
+.logo{
+    font-family: 'Comfortaa', cursive;
+}
+
+.logo-index{
+    font-size:88px;
+    font-family: 'Comfortaa', cursive;
+}
+
+
+.navbar-nav>li>.notification-box{
+    padding-left:15px;
+    padding-right:15px;
+    width:325px;
+    max-height:600px;
+    overflow:auto;
+}
+
+.dropdown-menu{
+    opacity: 0;
+}
+
+.notification-box{
+    opacity: 0;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+    animation: 0.25s linear fade;
+    opacity:1;
+    margin-top: 0; // remove the gap so it doesn't close
+}
+
+.dropdown:hover .notification-box {
+    display: block;
+    animation: 0.25s linear fade;
+    opacity:1;
+    margin-top: 0; // remove the gap so it doesn't close
+}
+
+.notificationBadge{
+    bottom:15px;
+    position:relative;
+}
+
+@keyframes fade{
+    0%,10%{
+        opacity: .1;
+    }
+    45%{
+        opacity: .45;
+    }
+    50%{
+        opacity: 0.5;
+    }
+    90%,95%{
+        opacity: 0.95;
+    }
+    100% {
+        opacity: 1;
     }
 
 }

@@ -1,6 +1,7 @@
 <?php
     $followerID = $_GET['followerID'];
     session_start();
+    include "db.php";
     if(empty($_SESSION['userID'])){
         $errorMsg = "Please login first.";
                 
@@ -35,6 +36,12 @@
             $stmt->close();
             $conn->close();
         }
-        header("Location: profile.php?userID=$followerID");
+        
+        if($rows == 0){
+            $content = "has followed you!";
+            processNotifications($followerID, $content, 2, $currUserID);
+        }
+        
+    header("Location:".$_SERVER["HTTP_REFERER"]);
     }
  ?>

@@ -15,7 +15,8 @@
                 <div class="container">
                     <div class="row justify-content-center">
                         <div class="col-md-12 text-center">
-                            <span class="display-1 d-block">Welcome!</span>
+                            <p class='text-center logo-index'>stori</p>
+                            <br>
                             <div class="mb-4 lead">Please Login or register!</div>
                             <a href="register.php" class="button three">Register</a>
                             <a href="login.php" class="button three">Login</a>
@@ -31,9 +32,6 @@
             $errorMsg = "";
             ?>
             <header class="jumbotron text-center" id="home">
-                <?php
-                echo "<h1>Welcome back user:" . $userID . "Name: " . $_SESSION['fname'] . "</h1>";
-                ?>
             </header>
             <main class="container">
                 <div class="row">
@@ -43,8 +41,8 @@
                             <div class="card-body">
                                 <form action="submitPost.php" method="post" class="comment-area-box mb-3">
                                     <div class="form-group">
-                                        <label for=2>Title:</label>
-                                        <input class="form-control" type="text" id=2 name=2 required placeholder="Enter title"> 
+                                        <label for="title">Title:</label>
+                                        <input class="form-control" type="text" id="title" name="title" required placeholder="Enter title"> 
                                     </div>
                                     <span class="input-icon">
                                         <label for="content">Content:</label>
@@ -111,11 +109,11 @@
                                             <div class="d-flex align-items-start" aria-labelledby="postContent">
                                                 <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
                                                 <div class="w-100">
-                                                    <h5 class=""><a href="viewPost.php?postID=<?php echo $row[0] ?>" class="button two"><?php echo $row[2] ?>   </a> <small class="text-muted"><?php echo time_elapsed_string($row[4]) ?></small></h5>
+                                                    <h5 class=""><a href="viewPost.php?postID=<?php echo $row[0] ?>" class="button four"><?php echo $row[2] ?>   </a> <small class="text-muted"><?php echo time_elapsed_string($row[4]) ?></small></h5>
                                                     <p class="card-text">
                                                         <?php echo $row[3] ?></p>
 
-                                                    <p class="text-right">Posted By: <a href="profile.php?userID=<?php echo $currUserID ?>" class="button two">@<?php echo $currUser['username'] ?></a></p>
+                                                    <p class="text-right">Posted By: <a href="profile.php?userID=<?php echo $currUserID ?>" class="button four">@<?php echo $currUser['username'] ?></a></p>
                                                     <div class="d-flex">
                                                         <br>
                                                         <a href="process_like.php?postID=<?php echo $row[0] . '&redirectTo=' . 2 ?>" class="button four d-inline-block mt-2 nav-link d-flex align-items-center" aria-label="Like this post">
@@ -162,7 +160,7 @@
                                                         <div class="d-flex align-items-start">
                                                             <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="Generic placeholder image">
                                                             <div class="w-100">
-                                                                <h5 class="mt-0"><a href="profile.php?userID=<?php echo $currCommentingUser[0] ?>" class="button two"><?php echo $currCommentingUser['fname'] . ' ' . $currCommentingUser['lname'] ?></a><small class="text-muted"> <?php echo time_elapsed_string($commentRows[4]) ?></small></h5>
+                                                                <h5 class="mt-0"><a href="profile.php?userID=<?php echo $currCommentingUser["userID"] ?>" class="button four"><?php echo $currCommentingUser['fname'] . ' ' . $currCommentingUser['lname'] ?></a><small class="text-muted"> <?php echo time_elapsed_string($commentRows[4]) ?></small></h5>
                                                                 <?php echo $commentRows[3] ?>
                                                             </div>
                                                             <?php

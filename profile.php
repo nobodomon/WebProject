@@ -9,6 +9,13 @@
         $userID = $_GET['userID'];
         $viewingUser = getUserFromID($userID);
         $posts = getPostByUser($userID);
+        if (!isset($_SESSION['userID'])) {
+            $sessionUser = -1;
+            $followed = false;
+        } else {
+            $sessionUser = $_SESSION['userID'];
+            $followed = checkIfFollowed($userID, $_SESSION['userID']);
+        }
         ?>
         <div class="container">
             <div class="row">
@@ -16,7 +23,7 @@
                     <section class="card" aria-labelledby="Profile Card">
                         <div class="card-body">
                             <?php
-                            if ($userID == $_SESSION['userID']) {
+                            if ($userID == $sessionUser) {
                                 ?> 
                                 <div class="dropdown float-end">
                                     <a href="#" class="dropdown-toggle arrow-none card-drop nav-link " data-bs-toggle="dropdown" aria-label="Profile options" aria-expanded="false">
@@ -39,12 +46,16 @@
                                     <h4 class="my-0"><?php echo $viewingUser['fname'] . ' ' . $viewingUser['lname']; ?></h4>
                                     <p class="text-muted">@<?php echo $viewingUser['username'] ?></p>
                                     <?php
-                                    $followed = checkIfFollowed($userID, $_SESSION['userID']);
-                                    if ($_SESSION['userID'] == $userID) {
+                                    if ($sessionUser == $userID) {
                                         
                                     } else if ($followed == false) {
+                                        if ($sessionUser == -1) {
 
-                                        echo "<a href='process_follow.php?followerID=$userID' class='button three'>Follow</a>";
+                                            echo "<a href='login.php' class='button three'>Follow</a>";
+                                        } else {
+
+                                            echo "<a href='process_follow.php?followerID=$userID' class='button three'>Follow</a>";
+                                        }
                                     } else {
 
                                         echo "<a href='process_follow.php?followerID=$userID' class='button three'>Unfollow</a>";
@@ -60,8 +71,19 @@
                                     <?php echo $viewingUser['biography'] ?>
                                 </p>
                                 <p class="text-muted mb-2 font-13"><strong>Full Name :</strong> <span class="ms-2"><?php echo $viewingUser['fname'] . ' ' . $viewingUser['lname']; ?></span></p>
-                            </div>                                    
+                            </div>   
+                            <div class="mt-3">
+                                <p class="text-muted mb-2 font-13"><strong>Interests :</strong> 
+                                    <?php
+                                    $interests = getCategoriesOfUser($userID);
 
+                                    while ($interest = $interests->fetch_array(MYSQLI_NUM)) {
+                                        ?>
+                                        <span class="badge rounded-pill bg-dark"><?php echo $interest[3] ?></span>
+                                        <?php
+                                    }
+                                    ?>
+                            </div>
                             <ul class="social-list list-inline mt-3 mb-0">
                                 <li class="list-inline-item">
                                     <a href="javascript: void(0);" class="social-list-item text-center border-primary text-primary" aria-label="Facebook"><i class="mdi mdi-facebook"></i></a>
@@ -99,7 +121,7 @@
                         <div class="card-body">
                             <!-- comment box -->
                             <?php
-                            if ($userID == $_SESSION['userID']) {
+                            if ($userID == $sessionUser) {
                                 ?> 
                                 <form action="submitPost.php" method="post" class="comment-area-box mb-3">
 
@@ -136,7 +158,7 @@
                             <?php
                             $postCount = getPostCountOfUser($userID);
                             if ($postCount == 0) {
-                                if (($userID == $_SESSION['userID'])) {
+                                if (($userID == $sessionUser)) {
 
                                     echo "<p>You have not not posted anything.</p>";
                                 } else {
@@ -150,8 +172,8 @@
                                     <div class="border border-light p-2 mb-3">
                                         <?php
                                         $postPrivacy = $row[5];
-                                        if (($userID == $_SESSION['userID']) || ($postPrivacy == 0 ) || ($postPrivacy == 1 && $followed)) {
-                                            if (($userID == $_SESSION['userID'])) {
+                                        if (($userID == $sessionUser) || ($postPrivacy == 0 ) || ($postPrivacy == 1 && $followed)) {
+                                            if (($userID == $sessionUser)) {
                                                 ?>
 
                                                 <div class="dropdown float-end">
@@ -170,18 +192,31 @@
                                             <div class="d-flex align-items-start" aria-labelledby="postContent">
                                                 <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
                                                 <div class="w-100">
-                                                    <h5 class=""><a href="viewPost.php?postID=<?php echo $row[0] ?>" class="button two"><?php echo $row[2] ?>   </a> <small class="text-muted"><?php echo time_elapsed_string($row[4]) ?></small></h5>
+                                                    <h5 class=""><a href="viewPost.php?postID=<?php echo $row[0] ?>" class="button four"><?php echo $row[2] ?>   </a> <small class="text-muted"><?php echo time_elapsed_string($row[4]) ?></small></h5>
                                                     <p class="card-text">
                                                         <?php echo $row[3] ?></p>
 
-                                                    <p class="text-right">Posted By: <a href="profile.php?userID=<?php echo $row[1] ?>" class="button two">@<?php echo $viewingUser['username'] ?></a></p>
+                                                    <p class="text-right">Posted By: <a href="profile.php?userID=<?php echo $row[1] ?>" class="button four">@<?php echo $viewingUser['username'] ?></a></p>
                                                     <div class="d-flex">
                                                         <br>
-                                                        <a href="process_like.php?postID=<?php echo $row[0] ?>" class="button four d-inline-block mt-2 nav-link d-flex align-items-center" aria-label="Like this post">
+                                                        <?php
+                                                        if ($sessionUser == -1) {
+                                                            $processLike = "login.php";
+                                                        } else {
+
+                                                            $processLike = "process_like.php?postID=" . $row[0];
+                                                        }
+                                                        ?>
+                                                        <a href="<?php echo $processLike ?>" class="button four d-inline-block mt-2 nav-link d-flex align-items-center" aria-label="Like this post">
                                                             <?php
                                                             $likes = getLikesForPost($row[0]);
                                                             $likeOrLikes = ($likes == 1) ? "Like" : "Likes";
-                                                            echo checkIfLiked($row[0], $_SESSION['userID']);
+                                                            if ($sessionUser == -1) {
+                                                                echo '<span class="material-icons">favorite_border</span>';
+                                                            } else {
+
+                                                                echo checkIfLiked($row[0], $_SESSION['userID']);
+                                                            }
                                                             echo "&nbsp;(" . $likes . ' ' . $likeOrLikes . ")";
                                                             ?> 
                                                         </a>
@@ -207,13 +242,23 @@
                                                 ?>
                                                 <div class="post-user-comment-box" aria-labelledby="postComments">
                                                     <?php
+                                                    if ($commentCount > 3) {
+                                                        ?>
+                                                        <div class='d-flex justify-content-between'>
+                                                            <a href="viewPost.php?postID=<?php echo $row[0] ?>" class='text-center' >View More comments</a>
+                                                            <br>
+                                                            <hr/>
+                                                        </div>
+                                                        <?php
+                                                    }
+
                                                     $currCommentingUserID = -1;
                                                     $currCommentingUser;
                                                     while ($commentRows = $comments->fetch_array(MYSQLI_NUM)) {
-                                                        if($currCommentingUserID == -1){
+                                                        if ($currCommentingUserID == -1) {
                                                             $currCommentingUserID = $commentRows[2];
                                                             $currCommentingUser = getUserFromID($commentRows[2]);
-                                                        }else if ($currCommentingUserID != $commentRows[2]){
+                                                        } else if ($currCommentingUserID != $commentRows[2]) {
                                                             $currCommentingUserID = $commentRows[2];
                                                             $currCommentingUser = getUserFromID($commentRows[2]);
                                                         }
@@ -221,7 +266,7 @@
                                                         <div class="d-flex align-items-start">
                                                             <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="Generic placeholder image">
                                                             <div class="w-100">
-                                                                <h5 class="mt-0"><a href="profile.php?userID=<?php echo $currCommentingUser['userID'] ?>" class="button two"><?php echo $currCommentingUser['fname'] . ' ' . $currCommentingUser['lname'] ?></a><small class="text-muted"> <?php echo time_elapsed_string($commentRows[4]) ?></small></h5>
+                                                                <h5 class="mt-0"><a href="profile.php?userID=<?php echo $currCommentingUser['userID'] ?>" class="button four"><?php echo $currCommentingUser['fname'] . ' ' . $currCommentingUser['lname'] ?></a><small class="text-muted"> <?php echo time_elapsed_string($commentRows[4]) ?></small></h5>
                                                                 <?php echo $commentRows[3] ?>
                                                             </div>
                                                             <?php
@@ -244,12 +289,17 @@
                                                         </div>
                                                         <?php
                                                     }
+                                                    if ($sessionUser == -1) {
+                                                        $commentProcess = "login.php";
+                                                    } else {
+                                                        $commentProcess = "process_comment.php?postID=$row[0] . '&userID=' . $row[1] . '&redirectTo=' . 0";
+                                                    }
                                                     ?>
                                                     <div class="d-flex align-items-start mt-2">
                                                         <a class="pe-2" href="#">
                                                             <img src="https://bootdey.com/img/Content/avatar/avatar1.png" class="rounded-circle" alt="Generic placeholder image" height="31">
                                                         </a>
-                                                        <form class="d-flex" method="post" action="process_comment.php?postID=<?php echo $row[0] . '&userID=' . $row[1] . '&redirectTo=' . 0 ?>">
+                                                        <form class="d-flex" method="post" action="<?php echo $commentProcess ?>">
                                                             <input type="text" id="comment" name="comment" class="form-control border-0 form-control-sm me-2" required placeholder="Add comment">
                                                             <button type="submit" name="_submit" class="btn btnoutline-primary" value='Submit'>Submit</button>
                                                         </form>

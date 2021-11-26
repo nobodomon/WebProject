@@ -48,8 +48,8 @@
                                             class="bi bi-bookmark-heart"></i>  Interests</span>
                                 </div>
                                 <?php while($row = $categoriesResults -> fetch_array(MYSQLI_NUM)){ ?>
-                                    <input type="checkbox" class="btn-check" id="btn-check" autocomplete="off" />
-                                    <label class="btn btn-outline-dark" for="btn-check" value="<?php echo $row[1]; ?>"></label>
+                                    <input type="checkbox" class="btn-check" name="interest[]" id="btn-check<?php echo $row[0]?>" autocomplete="off" value="<?php echo $row[0] ?>"/>
+                                    <label class="btn btn-outline-dark" for="btn-check<?php echo $row[0]?>"><?php echo $row[1]; ?></label>
                                 <?php } ?>
 
                                 <br>

@@ -1,5 +1,6 @@
 <?php
 
+include "db.php";
 session_start();
 $postID = $_GET['postID'];
 $redirect = $_GET['redirectTo'];
@@ -15,13 +16,9 @@ $stmt->close();
 $conn->close();
 
 $authorID = $_GET['userID'];
+$content = "has commented on your post!";
+processNotifications($authorID, $content, 1, $commentingUserID, $postID);
 
-if ($redirect == 1) {
-    header("Location: viewPost.php?postID=$postID");
-} else if($redirect == 2){
-    header("Location: index.php");
-}else {
-    header("Location: profile.php?userID=$authorID");
-}
+header("Location:" . $_SERVER["HTTP_REFERER"]);
 ?>
 

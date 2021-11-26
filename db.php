@@ -145,6 +145,50 @@ function getUserFromUsername($id) {
     return $user;
 }
 
+function searchPostCount($query) {
+    global $postSearchSuccess, $postSearchErrorMsg;
+    if ($query == "") {
+        $postSearchErrorMsg = "Search is empty";
+        $postSearchSuccess = false;
+    } else {
+        $splited_query = explode(' ', $query);
+        $sql_prep = "SELECT count(*) FROM post WHERE title OR content LIKE ?";
+        $splited_query[0] = "%$splited_query[0]%";
+        $types = "s";
+        for ($i = 1; $i < count($splited_query); $i++) {
+            $sql_prep = $sql_prep . " OR title OR content LIKE ?";
+            $types = $types . "s";
+            $splited_query[$i] = "%$splited_query[$i]%";
+        }
+
+        //Create database connection
+        $config = parse_ini_file('../../private/db-config.ini');
+        $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+        // Check connection
+        if ($conn->connect_error) {
+            $postSearchErrorMsg = "Connection failed: " . $conn->connect_error;
+            $postSearchSuccess = false;
+        } else {
+            //Prepare the statement:
+            $stmt = $conn->prepare($sql_prep);
+            //Bind & Execute the query statement:
+            $stmt->bind_param($types, ...$splited_query);
+            if (!$stmt->execute()) {
+                $postSearchErrorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+                $postSearchSuccess = false;
+            } else {
+                $result = $stmt->get_result();
+                $rows = $result->fetch_row()[0];
+                $postSearchSuccess = true;
+            }
+            $stmt->close();
+        }
+        $conn->close();
+        return $rows;
+    }
+}
+
 function getPostsRelatedToQuery($query) {
     global $postSearchSuccess, $postSearchErrorMsg;
     if ($query == "") {
@@ -185,6 +229,49 @@ function getPostsRelatedToQuery($query) {
         }
         $conn->close();
         return $result;
+    }
+}
+
+function searchUserNameCount($query) {
+    if ($query == "") {
+        $userSearchErrorMsg = "Search is empty";
+        $userSearchSuccess = false;
+    } else {
+        $splited_query = explode(' ', $query);
+        $sql_prep = "SELECT count(*) FROM users WHERE username OR fname OR lname OR email LIKE ?";
+        $splited_query[0] = "%$splited_query[0]%";
+        $types = "s";
+        for ($i = 1; $i < count($splited_query); $i++) {
+            $sql_prep = $sql_prep . " OR username OR fname OR lname OR email LIKE ?";
+            $types = $types . "s";
+            $splited_query[$i] = "%$splited_query[$i]%";
+        }
+        //Create database connection
+        $config = parse_ini_file('../../private/db-config.ini');
+        $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+        // Check connection
+        if ($conn->connect_error) {
+            $userSearchErrorMsg = "Connection failed: " . $conn->connect_error;
+            $userSearchSuccess = false;
+        } else {
+            //Prepare the statement:
+            $stmt = $conn->prepare($sql_prep);
+
+            //Bind & Execute the query statement:
+            $stmt->bind_param($types, ...$splited_query);
+            if (!$stmt->execute()) {
+                $userSearchErrorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+                $userSearchSuccess = false;
+            } else {
+                $result = $stmt->get_result();
+                $rows = $result->fetch_row()[0];
+                $userSearchSuccess = true;
+            }
+            $stmt->close();
+        }
+        $conn->close();
+        return $rows;
     }
 }
 
@@ -463,6 +550,31 @@ function getAllCategories() {
     return $result;
 }
 
+function getCategoriesOfUser($userID) {
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+    } else {
+        //Prepare the statement:
+        $stmt = $conn->prepare("SELECT * FROM interest INNER JOIN categories ON categories.categoryID = interest.categoryID WHERE userID=?");
+        $stmt->bind_param("i", $userID);
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        } else {
+            $result = $stmt->get_result();
+        }
+        $stmt->close();
+    }
+    $conn->close();
+    return $result;
+}
+
 function getTotalCategoriesCount() {
     //Create database connection
     $config = parse_ini_file('../../private/db-config.ini');
@@ -489,4 +601,92 @@ function getTotalCategoriesCount() {
     $conn->close();
     return $user;
 }
+
+// related 0 = Like
+// related 1 = comment
+// related 2 = follow
+// related 3 = subscribe
+function processNotifications($userID, $content, $related, $fromUserID,$relatedContentID = 0) {
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+    } else {
+        //Prepare the statement:
+        $dateTimeNow = date_create()->format('Y-m-d H:i:s');
+        if ($related != 1 && $related != 0) {
+            $stmt = $conn->prepare("INSERT into notifications (userID,notificationContent,notificationDateTime,related,relatedID) VALUES (?,?,?,?,?)");
+            $stmt->bind_param("issii", $userID, $content, $dateTimeNow, $related, $fromUserID);
+        } else {
+            $stmt = $conn->prepare("INSERT into notifications (userID,notificationContent,notificationDateTime,related,relatedID,relatedContentID) VALUES (?,?,?,?,?,?)");
+            $stmt->bind_param("issiii", $userID, $content, $dateTimeNow, $related, $fromUserID,$relatedContentID);
+        }
+        //Bind & Execute the query statement:
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        } else {
+        }
+        $stmt->close();
+    }
+    $conn->close();
+}
+
+function getNotification($userID) {
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+    } else {
+        //Prepare the statement:
+        $stmt = $conn->prepare("SELECT * FROM notifications WHERE userID=?");
+        //Bind & Execute the query statement:
+        $stmt->bind_param("i", $userID);
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        } else {
+            $notifications = $stmt->get_result();
+        }
+        $stmt->close();
+    }
+    $conn->close();
+    return $notifications;
+}
+
+function getNotificationCount($userID) {
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+    } else {
+        //Prepare the statement:
+        $stmt = $conn->prepare("SELECT count(*) FROM notifications WHERE userID = ?");
+        //Bind & Execute the query statement:
+        $stmt->bind_param("i", $userID);
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        } else {
+            $result = $stmt->get_result();
+            $notificationCount = $result->fetch_row()[0];
+        }
+        $stmt->close();
+    }
+    $conn->close();
+    return $notificationCount;
+}
+
 ?>

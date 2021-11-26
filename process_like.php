@@ -1,5 +1,5 @@
 <?php
-
+include "db.php";
 $postID = $_GET['postID'];
 $redirect = $_GET['redirectTo'];
 session_start();
@@ -42,14 +42,12 @@ function addLike($postID, $userID) {
     $authorID = $result->fetch_object();
     $stmt->close();
     $conn->close();
-
-    if ($redirect == 1) {
-        header("Location: viewPost.php?postID=$postID");
-    } else if($redirect == 2){
-        header("Location: index.php");
-    }else {
-        header("Location: profile.php?userID=$authorID->author_id");
+    $notificationContent = "has liked your post!";
+    if($rows == 0){
+        processNotifications($authorID->author_id,$notificationContent,0,$userID,$postID);
     }
+    
+    header("Location:".$_SERVER["HTTP_REFERER"]);
 }
 
 ?>

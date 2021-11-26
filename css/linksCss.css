@@ -1,8 +1,7 @@
 .button{
 	text-decoration: none;
 	color: #212529;
-	font-weight: bold;
-	font-size: 20px;
+	font-size: 16px;
 	position: relative;
 	padding: 10px;
 }
