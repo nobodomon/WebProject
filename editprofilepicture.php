@@ -7,6 +7,7 @@
     <body>
         <?php
         include "nav.inc.php";
+        session_start();
         // get current user details
         $userResults = getUserFromID($_SESSION['userID']);
         ?>
@@ -23,7 +24,7 @@
                                 <?php echo $msg; ?>
                             </div>
                         <?php endif; ?>
-                        <form action="editprofilepicture.php" method="post" enctype="multipart/form-data">
+                        <form action="process_editprofilepicture.php" method="post" enctype="multipart/form-data">
                             <div class="col-4 offset-md-4 form-div"> 
                                 <div class="form-group">
                                     <label for="profileImage"> Profile Image </label>
