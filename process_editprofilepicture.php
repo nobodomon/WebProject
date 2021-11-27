@@ -22,7 +22,7 @@
                   
                     if (mysqli_query($conn, $sql))
                     {
-                        $msg = $sql;
+                        $msg = "Upload Sucess";
                         $css_class = "alert-success";
                     }
                     else
