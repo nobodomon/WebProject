@@ -31,7 +31,7 @@ $conn = new mysqli($config['servername'], $config['username'], $config['password
           if (!$stmt->error) {
             $msg = "Upload success";
             $css_class = "alert-success";
-            header("Location: editprofilepicture.php");
+            header("Location: editProfile.php");
           } 
           else {
             $_SESSION['error'] = $stmt->error;
