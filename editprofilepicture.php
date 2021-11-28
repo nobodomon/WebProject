@@ -1,7 +1,12 @@
 <?php include 'process_editprofilepicture.php'?>
 <link rel="stylesheet" href="css/profilepage.css"/>
     <?php
-    include "head.inc.php"
+    include "head.inc.php";
+    
+    if(!isset($_SESSION['userID'])){
+            header("Location: index.php");
+            die();
+        }
     ?>
     <body>
         <?php
@@ -22,7 +27,7 @@
                                 <?php echo $msg; ?>
                             </div>
                         <?php endif; ?>
-                        <form action="editprofilepicture.php" method="post" enctype="multipart/form-data">
+                        <form action="process_editprofilepicture.php" method="post" enctype="multipart/form-data">
                             <div class="col-4 offset-md-4 form-div"> 
                                 <div class="form-group text-center">
                                     <img src="images/default.jpg" onclick="click()" id="profileDisplay" />
