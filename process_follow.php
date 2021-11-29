@@ -21,6 +21,7 @@
         if($rows == 0)
         {
             //if follower record doesn't exist, insert follow record
+            header("Location:".$_SERVER["HTTP_REFERER"]);
             $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
             $stmt = $conn -> prepare("INSERT INTO followers (userID, followerID) VALUES (?,?)");
             $stmt->bind_param("ii",$followerID,$currUserID);

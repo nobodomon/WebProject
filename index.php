@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
     <?php
+    header("Set-Cookie: cross-site-cookie=whatever; SameSite=None; Secure");
     include "head.inc.php"
     ?>
     <body>   
@@ -15,7 +16,10 @@
                 <div class="container">
                     <div class="row justify-content-center">
                         <div class="col-md-12 text-center">
-                            <p class='text-center logo-index'>stori</p>
+                            <div class="d-flex justify-content-center">
+                                <img src="images/favicon.png" width="256px" height="256px">
+                                <p class='text-center logo-index align-self-center'>stori</p>
+                            </div>
                             <br>
                             <div class="mb-4 lead">Please Login or register!</div>
                             <a href="register.php" class="button three">Register</a>
@@ -29,15 +33,16 @@
             <?php
         } else {
             $userID = $_SESSION['userID'];
+            $sessionUser = getUserFromID($userID);
             $errorMsg = "";
             ?>
             <header class="jumbotron text-center" id="home">
             </header>
             <main class="container">
                 <div class="row">
-                    <section class="col-xl-4">
+                    <section class="col-xl-5">
                         <!--Create post box-->
-                        <article class = "card" aria-labelledby="Create a new post box">
+                        <aside class ="card">
                             <div class="card-body">
                                 <form action="submitPost.php" method="post" class="comment-area-box mb-3">
                                     <div class="form-group">
@@ -57,17 +62,17 @@
                                                 <option value="2">Subscribers only</option>
                                             </select>
                                             <div class="float-end">
-                                                <button type="submit" class="btn btn-outline-success waves-effect waves-light">Post</button>
+                                                <button type="submit" class="btn btn-primary waves-effect waves-light">Post</button>
                                             </div>
                                         </div>
                                     </div>
                                 </form>
                             </div>
-                        </article>
+                        </aside>
                         <!---->
                     </section>
-                    <div class="col-xl-8">
-                        <section class="card" aria-labelledby="Posts">
+                    <div class="col-xl-7">
+                        <section class="card" role="feed">
                             <div class="card-body">
 
                                 <!-- Story Box-->
@@ -82,6 +87,7 @@
                                         <?php
                                         $postPrivacy = $row[5];
                                         $followed = checkIfFollowed($row[1], $userID);
+                                        $subscribed = checkIfSubscribed($row[1],$userID);
                                         if ($currUserID == -1) {
                                             $currUserID = $row[1];
                                             $currUser = getUserFromID($currUserID);
@@ -89,7 +95,7 @@
                                             $currUserID = $row[1];
                                             $currUser = getUserFromID($currUserID);
                                         }
-                                        if (($userID == $row[1]) || ($postPrivacy == 0 ) || ($postPrivacy == 1 && $followed)) {
+                                        if (($userID == $row[1]) || ($postPrivacy == 0 ) || ($postPrivacy == 1 && $followed) || ($postPrivacy == 2 && $subscribed)) {
                                             if ($userID == $row[1]) {
                                                 ?>
 
@@ -101,21 +107,35 @@
                                                         <!-- item-->
                                                         <a href="process_delete.php?postID=<?php echo $row[0] ?>" class="dropdown-item">Delete Post</a>
                                                         <!-- item-->
-                                                        <a href="editPost.php" class="dropdown-item">Edit Post</a>
+                                                        <a href="editPost.php?postID=<?php echo $row[0] ?>" class="dropdown-item">Edit Post</a>
                                                     </div>
                                                 </div>
                                             <?php }
                                             ?>
-                                            <div class="d-flex align-items-start" aria-labelledby="postContent">
-                                                <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
+                                            <article class="d-flex align-items-start">
+                                                <a href="profile.php?userID=<?php echo $currUser['userID']?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/'.$currUser['profilePic']?>" alt="Generic placeholder image"></a>
                                                 <div class="w-100">
-                                                    <h5 class=""><a href="viewPost.php?postID=<?php echo $row[0] ?>" class="button four"><?php echo $row[2] ?>   </a> <small class="text-muted"><?php echo time_elapsed_string($row[4]) ?></small></h5>
-                                                    <p class="card-text">
-                                                        <?php echo $row[3] ?></p>
+                                                    <a href="viewPost.php?postID=<?php echo $row[0] ?>"  class="button-nopadding six" aria-label="Read more about <?php echo $row[2]?>"><?php echo $row[2] ?></a> <small class="text-muted"><?php echo time_elapsed_string($row[4]) ?></small>
+                                                    <hr>
+                                                    <section class="card-text">
+                                                        <?php echo $row[3] ?>
+                                                    </section>
 
-                                                    <p class="text-right">Posted By: <a href="profile.php?userID=<?php echo $currUserID ?>" class="button four">@<?php echo $currUser['username'] ?></a></p>
+                                                    <p class="text-right"><small>Posted By: 
+                                                        <a href="profile.php?userID=<?php echo $currUserID ?>" class="button-nopadding six">
+                                                            @<?php echo $currUser['username'] ?>
+                                                        </a>
+                                                        <?php
+                                                        if ($row[6] == 0) {
+                                                            ?>
+                                                        <?php } else if ($row[6] == 1) { ?>
+                                                        edited <?php echo time_elapsed_string($row[7]) ?>
+                                                        <?php } else {
+                                                            
+                                                        }
+                                                        ?>
+                                                        </small></p>
                                                     <div class="d-flex">
-                                                        <br>
                                                         <a href="process_like.php?postID=<?php echo $row[0] . '&redirectTo=' . 2 ?>" class="button four d-inline-block mt-2 nav-link d-flex align-items-center" aria-label="Like this post">
                                                             <?php
                                                             $likes = getLikesForPost($row[0]);
@@ -136,7 +156,7 @@
                                                     </div>
                                                     <hr>
                                                 </div>
-                                            </div>
+                                            </article>
 
                                             <?php
                                             $comments = getCommentsForPost($row[0]);
@@ -144,8 +164,17 @@
                                                 
                                             } else {
                                                 ?>
-                                                <div class="post-user-comment-box" aria-labelledby="postComments">
+                                                <div class="post-user-comment-box">
                                                     <?php
+                                                    if ($commentCount > 3) {
+                                                        ?>
+                                                        <div class='d-flex justify-content-between'>
+                                                            <a href="viewPost.php?postID=<?php echo $row[0] ?>" class='text-center' >View More comments</a>
+                                                            <br>
+                                                            <hr/>
+                                                        </div>
+                                                        <?php
+                                                    }
                                                     $currCommentingUserID = -1;
                                                     $currCommentingUser;
                                                     while ($commentRows = $comments->fetch_array(MYSQLI_NUM)) {
@@ -157,11 +186,11 @@
                                                             $currCommentingUser = getUserFromID($commentRows[2]);
                                                         }
                                                         ?>
-                                                        <div class="d-flex align-items-start">
-                                                            <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="Generic placeholder image">
+                                                        <div class="d-flex align-items-start" role="comment">
+                                                            <a href="profile.php?userID=<?=$currCommentingUser['userID']?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/'.$currCommentingUser['profilePic']?>" alt="Generic placeholder image"></a>
                                                             <div class="w-100">
-                                                                <h5 class="mt-0"><a href="profile.php?userID=<?php echo $currCommentingUser["userID"] ?>" class="button four"><?php echo $currCommentingUser['fname'] . ' ' . $currCommentingUser['lname'] ?></a><small class="text-muted"> <?php echo time_elapsed_string($commentRows[4]) ?></small></h5>
-                                                                <?php echo $commentRows[3] ?>
+                                                                <a href="profile.php?userID=<?php echo $currCommentingUser["userID"] ?>" class="button-nopadding six"><?php echo $currCommentingUser['fname'] . ' ' . $currCommentingUser['lname'] ?></a><small class="text-muted"> <?php echo time_elapsed_string($commentRows[4]) ?></small><br>
+                                                            <?php echo $commentRows[3] ?>
                                                             </div>
                                                             <?php
                                                             if ($currCommentingUser['userID'] == $userID) {
@@ -173,8 +202,6 @@
                                                                     <div class="dropdown-menu dropdown-menu-end">
                                                                         <!-- item-->
                                                                         <a href="process_deletecomment.php?commentID=<?php echo $commentRows[0] ?>" class="dropdown-item">Delete comment</a>
-                                                                        <!-- item-->
-                                                                        <a href="logout.php" class="dropdown-item">Edit comment</a>
                                                                     </div>
                                                                 </div>
                                                                 <?php
@@ -185,12 +212,12 @@
                                                     }
                                                     ?>
                                                     <div class="d-flex align-items-start mt-2">
-                                                        <a class="pe-2" href="#">
-                                                            <img src="https://bootdey.com/img/Content/avatar/avatar1.png" class="rounded-circle" alt="Generic placeholder image" height="31">
+                                                        <a class="pe-2" href="profile.php?userID="<?php echo $sessionUser['userID']?>>
+                                                            <img src="<?php echo 'images/'.$sessionUser['profilePic']?>" class="rounded-circle" alt="Profile picture" height="31" width="31">
                                                         </a>
                                                         <form class="d-flex" method="post" action="process_comment.php?postID=<?php echo $row[0] . '&userID=' . $row[1] . '&redirectTo=' . 2 ?>">
                                                             <input type="text" id="comment" name="comment" class="form-control border-0 form-control-sm me-2" required placeholder="Add comment">
-                                                            <button type="submit" name="_submit" class="btn btnoutline-primary" value='Submit'>Submit</button>
+                                                            <button type="submit" name="_submit" class="btn btn-primary" value='Submit'>Submit</button>
                                                         </form>
                                                     </div>
                                                 </div>

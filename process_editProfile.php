@@ -14,7 +14,9 @@
         $success = true;
         $newUsername = "";
         $interests = $_POST["interest"];
-//          check if any fields are empty
+        $h4 = "";
+        $btn = "";
+//      check if any fields are empty
         if (empty($_POST["fname"]) || empty($_POST["lname"]) || empty($_POST["username"]) || empty($_POST["biography"])) {
             $errorMsg .= "All fields are required.<br>";
             $success = false;
@@ -35,7 +37,8 @@
                 $success = true;
             }
         }
-
+//        only add those additional interests
+//        then those uncheck de need to remove
         if ($success) {
             $config = parse_ini_file('../../private/db-config.ini');
             $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
@@ -54,13 +57,19 @@
                     $success = true;
                 }
                 $stmt->close();
-
+                $stmt = $conn->prepare("DELETE FROM interest WHERE userID = ?");
+                $stmt->bind_param("i", $_SESSION["userID"]);
+                $stmt->execute();
+                $stmt->close();
                 foreach ($interests as $interest) {
                     $stmt = $conn->prepare("INSERT INTO interest(userID,categoryID) VALUES(?,?)");
                     $stmt->bind_param("ii", $_SESSION["userID"], $interest);
                     $stmt->execute();
                     $stmt->close();
                 }
+                
+                $h4 = "<h4>Edit Profile Successfully</h4>";
+                $btn = "<a href='index.php'><button class = 'btn btn-success'>Return to Home Page</button></a><br>";
             }
             $conn->close();
         }
@@ -68,11 +77,13 @@
         <main class="container">
             <hr>
             <?php
+            echo $h4;
             if (empty($errorMsg)) {
                 
             } else {
                 echo $errorMsg;
             }
+            echo $btn;
             ?>
             <br>
         </main>

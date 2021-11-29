@@ -17,13 +17,14 @@
             $title = $_POST['title'];
             $content = $_POST['content'];
             $postType = $_POST['postType'];
+            $postID = $_GET['pid'];
             validatePostType();
         }
         if ($success) {
             //$h3 = "<h3>Your Registration successful!</h3>";
             //$h4 = "<h4>Thank you for signing up, ". $_POST["lname"]. " " . $_POST["fname"] ."</h4>";
             //$btn = "<a href='#'><button class = 'btn btn-success'>Log-in </button></a><br>";
-            if (createPost()) {
+            if (editPost()) {
                 
             } else {
                 $h3 = "<h3>Oops!";
@@ -41,7 +42,7 @@
         function validatePostType() {
             global $postType, $success, $errorMsg;
             $allowedPostTypes = array(0, 1, 2);
-            if (in_array((int)$postType, $allowedPostTypes, true)) {
+            if (in_array((int) $postType, $allowedPostTypes, true)) {
                 $success = true;
             } else {
                 $success = false;
@@ -49,8 +50,8 @@
             }
         }
 
-        function createPost() {
-            global $success, $errorMsg, $title, $content, $postType;
+        function editPost() {
+            global $success, $errorMsg, $title, $content, $postType, $postID;
             $sanitizedContent = htmLawed($content);
             $config = parse_ini_file('../../private/db-config.ini');
             $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
@@ -58,10 +59,12 @@
                 $errorMsg .= "Connection failed: " . $conn->connect_error;
                 $success = false;
             } else {
-                $stmt = $conn->prepare("INSERT INTO post (author_id, title, content, postedDateTime, postType) VALUES (?,?,?,?,?)");
-                //Bind & Execute the query statement:
+
                 $dateTimeNow = date_create()->format('Y-m-d H:i:s');
-                $stmt->bind_param("isssi", $_SESSION["userID"], $title, $sanitizedContent, $dateTimeNow, $postType);
+                $edited = 1;
+                $stmt = $conn->prepare("UPDATE post SET title =?, content =?, postType =?, editedDateTime =?, edited =? WHERE post_id =? AND author_id = ?");
+                //Bind & Execute the query statement:
+                $stmt->bind_param("ssisiii", $title, $sanitizedContent, $postType, $dateTimeNow, $edited, $postID, $_SESSION['userID']);
                 if (!$stmt->execute()) {
                     $errorMsg .= "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
                     $success = false;
@@ -82,7 +85,7 @@
                             <?php if ($success) { ?>
 
                                 <span class="display-1 d-block">Yay!</span>
-                                <div class="mb-4 lead">Your post was created successfully!</div>
+                                <div class="mb-4 lead">Your post was edited successfully!</div>
                                 <a href="index.php" class="btn btn-link">Back to Home</a>
                             <?php } else { ?>
 

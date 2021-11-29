@@ -9,10 +9,7 @@
         ?>
         <?php
         $email = $errorMsg = $interest = "";
-        $interest1 = ($_POST["int1"]);
-        $interest2 = ($_POST["int2"]);
-        $interest3 = ($_POST["int3"]);
-        $interest = $interest1  .', '.$interest2 .', '.$interest3;
+        $interests = $_POST["interest"];
         $username = sanitize_input($_POST["username"]);
         $lname = sanitize_input($_POST["lname"]);
         $fname = sanitize_input($_POST["fname"]);
@@ -89,7 +86,7 @@
         
         function saveMemberToDB()
         {
-            global $errorMsg, $success, $username, $fname, $lname, $email, $pwd, $interest;
+            global $errorMsg, $success, $username, $fname, $lname, $email, $pwd, $interests;
             
             //Create database connection
             $config = parse_ini_file('../../private/db-config.ini');
@@ -132,6 +129,19 @@
                     $btn = "<a href='login.php'><button class = 'btn btn-success'>Log-in </button></a><br>";
                 }
                 $stmt->close();
+                
+                $stmt = $conn -> prepare("SELECT userID FROM users WHERE email =?");
+                $stmt->bind_param("s",$email);
+                $stmt->execute();
+                $user = $stmt->get_result()->fetch_row()[0];
+                
+                
+                foreach ($interests as $interest) {
+                    $stmt = $conn->prepare("INSERT INTO interest(userID,categoryID) VALUES(?,?)");
+                    $stmt->bind_param("ii", $user, $interest);
+                    $stmt->execute();
+                    $stmt->close();
+                }
                 
             }
             $conn->close();

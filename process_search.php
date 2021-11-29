@@ -49,9 +49,9 @@
                                 ?>
                                 <article class="card mt-3">
                                     <div class="card-body d-flex align-items-start">
-                                        <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
+                                        <a href="profile.php?userID=<?=$userRows[0]?>"><img class="me-2 avatar-sm rounded-circle" src="<?='images/'.$userRows[8]?>" alt="Generic placeholder image"></a>
                                         <div class="flex-grow-1">
-                                            <h5 class=""><?php echo $userRows[1] ?></h5>
+                                            <a href="profile.php?userID=<?=$userRows[0]?>" class="button-nopadding six"><?php echo $userRows[1] ?></a>
                                             <p class="card-text">
                                                 <?php echo $userRows[2] . " " . $userRows[3] ?></p>
                                         </div>
@@ -92,18 +92,27 @@
                     <?php
                     if ($postSearchSuccess == true) {
                         if ($postResults->num_rows > 0) {
-                            while ($postRows = $postResults->fetch_array(MYSQLI_NUM)) {
-                                ?>
 
+                            $authorID = -1;
+                            $author;
+                            while ($postRows = $postResults->fetch_array(MYSQLI_NUM)) {
+                                if ($authorID == -1) {
+                                    $authorID = $postRows[1];
+                                    $author = getUserFromID($postRows[1]);
+                                } else if ($authorID != $postRows[1]) {
+                                    $authorID = $postRows[1];
+                                    $author = getUserFromID($postRows[1]);
+                                }
+                                ?>
                                 <article class="card mt-3">
                                     <div class="card-body d-flex align-items-start">
-                                        <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
-                                        <div class="flex-grow-1">
-                                            <h5 class=""><?php echo $postRows[2] ?><small class="text-muted"><?php echo time_elapsed_string($postRows[4]) ?></small></h5>
-                                            <p class="card-text">
-                                                <?php echo $postRows[3] ?></p>
-                                        </div>
-                                        <a href="viewPost.php?postID=<?php echo $postRows[0] ?>" class="button three">View Post</a>
+                                        <a href="profile.php?userID=<?= $postRows[1] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?= 'images/' . $author['profilePic'] ?>" alt="Generic placeholder image">
+                                            <div class="flex-grow-1">
+                                                <a href="viewPost.php?postID=<?= $postRows[0] ?>" class="button-nopadding six"><?php echo $postRows[2] ?></a> <small class="text-muted"><?php echo time_elapsed_string($postRows[4]) ?></small>
+                                                <p class="card-text">
+                                                    <?php echo $postRows[3] ?></p>
+                                            </div>
+                                            <a href="viewPost.php?postID=<?php echo $postRows[0] ?>" class="button three">View Post</a>
                                     </div>
                                 </article>
                                 <?php

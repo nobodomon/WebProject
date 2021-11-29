@@ -10,20 +10,239 @@
         $viewingUser = getUserFromID($userID);
         $posts = getPostByUser($userID);
         if (!isset($_SESSION['userID'])) {
-            $sessionUser = -1;
+            $sessionUserID = -1;
             $followed = false;
+            $subscribed = false;
         } else {
-            $sessionUser = $_SESSION['userID'];
+            $sessionUserID = $_SESSION['userID'];
+            $sessionUser = getUserFromID($_SESSION['userID']);
             $followed = checkIfFollowed($userID, $_SESSION['userID']);
+            $subscribed = checkIfSubscribed($userID, $_SESSION['userID']);
         }
         ?>
-        <div class="container">
+        <!-- Modal -->
+        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <?php
+                        if ($subscribed) {
+                            $title = "Confirm to unsubscribe?";
+                        } else {
+
+                            $title = "Confirm subscription?";
+                        }
+                        ?>
+                        <h5 class="modal-title" id="staticBackdropLabel"><?php echo $title ?></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <?php
+                        if ($subscribed) {
+                            //Unsubscribe dialog
+                            $subBtn = "<a href='process_subscribe.php?subscriberID=$userID'class='button three'>Unsubscribe</a>";
+                            ?>
+                            <h3>Are you sure?</h3>
+                            <p>Subscriptions are non refundable!</p>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <?= $subBtn ?>
+                            </div>
+                            <?php
+                        } else {
+                            //Subscribe dialog
+                            $subBtn = "<button type='submit' class='button three'>Subscribe</button>";
+                            ?>
+                            <h3>Confirm Subscription?</h3>
+                            <p>Subscribing to <?= "@" . $viewingUser['username'] ?> will allow you to see exclusive subscriber only posts.</p>
+                            <form method="post" action="process_subscribe.php?subscriberID=<?php echo $userID ?>">
+                                <div class="p-4">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text bg-primary">Name on card</span>
+                                        <input class="form-control" required type="text" id="cardName" name="cardName" placeholder="Enter Name on card">
+                                    </div>
+                                </div>
+
+                                <div class="p-4">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text bg-primary">Credit Card Number</span>
+                                        <input class="form-control" required type="number" inputmode="numeric" id="ccNo" pattern="[0-9]*" name="ccNo" placeholder="1111-2222-3333-4444">
+                                    </div>
+                                </div>
+
+                                <div class="p-4">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text bg-primary">Expiry Month</span>
+                                        <select class="form-control" required type="text" id="expiryMonth" min="1" max="12" name="expiryMonth" placeholder="Enter Name on card">
+                                            <?php
+                                            $months = array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
+                                            $monthIndex = 1;
+                                            foreach ($months as $month) {
+                                                ?>
+                                                <option value="<?php echo $monthIndex ?>"><?php echo $month ?></option>
+                                                <?php
+                                                $i++;
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text bg-primary">Expiry Year</span>
+                                        <select class="form-control" required id="expiryYear" name="expiryYear" placeholder="Enter Name on card">
+                                            <?php
+                                            $min = date("Y");
+                                            $max = date("Y") + 4;
+
+                                            for ($i = $min; $i < $max + 1; $i++) {
+                                                ?>
+                                                <option value="<?php echo $i ?>"><?php echo $i ?></option>
+                                                <?php
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="p-4">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text bg-primary">CCV</span>
+                                        <input class="form-control" required type="number" id="ccv" name="ccv" pattern="[0-9]*" placeholder="Enter ccv on card">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <?= $subBtn ?>
+                                </div>
+                            </form>
+                            <?php
+                        }
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="followersModal" tabindex="-1" aria-labelledby="followersModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="followersModalLabel">Followers</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <?php
+                        $followers = getFollowers($userID);
+                        $followerCount = getFollowerCount($userID);
+                        if ($followerCount == 0) {
+                            ?>
+                            <div class="d-flex align-items-center mb-3">
+                                <p class="text-center flex-grow-1">No followers</p>
+                            </div>
+                            <?php
+                        } else {
+                            while ($follower = $followers->fetch_array(MYSQLI_NUM)) {
+                                ?>
+                                <div class="d-flex align-items-start mb-3">
+                                    <a href="profile.php?userID=<?= $follower[0] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/' . $follower[8] ?>" alt="Generic placeholder image"></a>
+                                    <div class="w-100 align-self-center">
+                                        <a href="profile.php?userID=<?php echo $follower[0] ?>" class="button-nopadding six"><?php echo $follower[1] ?></a>
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                        }
+                        ?>
+                    </div>
+                    <div class="modal-footer">
+                        <a type="button" class="button three" data-bs-dismiss="modal">Close</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="followingModal" tabindex="-1" aria-labelledby="followingModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="followingModalLabel">Following</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <?php
+                        $following = getFollowing($userID);
+                        $followingCount = getFollowingCount($userID);
+                        if ($followingCount == 0) {
+                            ?>
+                            <div class="d-flex align-items-center mb-3">
+                                <p class="text-center flex-grow-1">Not following any user</p>
+                            </div>
+                            <?php
+                        } else {
+                            while ($followingUser = $following->fetch_array(MYSQLI_NUM)) {
+                                ?>
+                                <div class="d-flex align-items-start mb-3">
+                                    <a href="profile.php?userID=<?= $followingUser[0] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/' . $followingUser[8] ?>" alt="Generic placeholder image"></a>
+                                    <div class="w-100 align-self-center">
+                                        <a href="profile.php?userID=<?php echo $followingUser[0] ?>" class="button-nopadding six"><?php echo $followingUser[1] ?></a>
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                        }
+                        ?>
+                    </div>
+                    <div class="modal-footer">
+                        <a type="button" class="button three" data-bs-dismiss="modal">Close</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="subscriberModal" tabindex="-1" aria-labelledby="subscriberModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="subscriberModalLabel">Subscribers</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <?php
+                        $subscribers = getSubscribers($userID);
+                        $subscribersCount = getSubscribersCount($userID);
+                        if ($subscribersCount == 0) {
+                            ?>
+                            <div class="d-flex align-items-center mb-3">
+                                <p class="text-center flex-grow-1">No subscribers</p>
+                            </div>
+                            <?php
+                        } else {
+                            while ($subscriber = $subscribers->fetch_array(MYSQLI_NUM)) {
+                                ?>
+                                <div class="d-flex align-items-start mb-3">
+                                    <a href="profile.php?userID=<?= $subscriber[0] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/' . $subscriber[8] ?>" alt="Generic placeholder image"></a>
+                                    <div class="w-100 align-self-center">
+                                        <a href="profile.php?userID=<?php echo $subscriber[0] ?>" class="button-nopadding six"><?php echo $subscriber[1] ?></a>
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                        }
+                        ?>
+                    </div>
+                    <div class="modal-footer">
+                        <a type="button" class="button three" data-bs-dismiss="modal">Close</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <main class="container">
             <div class="row">
                 <div class="col-xl-5">
-                    <section class="card" aria-labelledby="Profile Card">
+                    <aside class="card">
                         <div class="card-body">
                             <?php
-                            if ($userID == $sessionUser) {
+                            if ($userID == $sessionUserID) {
                                 ?> 
                                 <div class="dropdown float-end">
                                     <a href="#" class="dropdown-toggle arrow-none card-drop nav-link " data-bs-toggle="dropdown" aria-label="Profile options" aria-expanded="false">
@@ -41,15 +260,15 @@
                             ?>
 
                             <div class="d-flex align-items-start">
-                                <img src="https://bootdey.com/img/Content/avatar/avatar1.png" class="rounded-circle avatar-lg img-thumbnail" alt="profile-image">
+                                <img src="<?php echo 'images/' . $viewingUser['profilePic'] ?>" class="rounded-circle avatar-lg img-thumbnail" alt="profile-image">
                                 <div class="w-100 ms-3">
                                     <h4 class="my-0"><?php echo $viewingUser['fname'] . ' ' . $viewingUser['lname']; ?></h4>
                                     <p class="text-muted">@<?php echo $viewingUser['username'] ?></p>
                                     <?php
-                                    if ($sessionUser == $userID) {
+                                    if ($sessionUserID == $userID) {
                                         
                                     } else if ($followed == false) {
-                                        if ($sessionUser == -1) {
+                                        if ($sessionUserID == -1) {
 
                                             echo "<a href='login.php' class='button three'>Follow</a>";
                                         } else {
@@ -61,7 +280,27 @@
                                         echo "<a href='process_follow.php?followerID=$userID' class='button three'>Unfollow</a>";
                                     }
                                     ?>
-                                    <button type="button" class="btn btn-soft-success btn-xs waves-effect mb-2 waves-light">Subscribe</button>
+
+                                    <?php
+                                    if ($sessionUserID == $userID) {
+                                        
+                                    } else if ($subscribed == false) {
+                                        if ($sessionUserID == -1) {
+
+                                            echo "<a href='login.php' class='button three'>Subscribe</a>";
+                                        } else {
+                                            echo "<a href='#' class='button three' data-bs-toggle='modal' data-bs-target='#staticBackdrop'>Subscribe</a>";
+                                        }
+                                    } else {
+                                        echo "<a href='#' class='button three' data-bs-toggle='modal' data-bs-target='#staticBackdrop'>Unsubscribe</a>";
+                                    }
+                                    ?>
+                                    <!--upon clicking subscribe have a payment page form-->
+                                    <!--need to get card no, card name, cvv-->
+                                    <!--check if card is valid anot-->
+                                    <!--validate client and server side-->
+
+
                                 </div>
                             </div>
 
@@ -93,23 +332,23 @@
                                 </li>
                             </ul>   
                         </div>                                 
-                    </section> <!-- end card -->
+                    </aside> <!-- end card -->
 
                     <!--To implement follower and subscriber count-->
-                    <section class="card" aria-labelledby="Profile statistics">
+                    <section class="card">
                         <div class="card-body text-center">
                             <div class="row">
                                 <div class="col-4 border-end border-light">
-                                    <h5 class="text-muted mt-1 mb-2 fw-normal">Followers</h5>
-                                    <h2 class="mb-0 fw-bold"><?php echo getFollowerCount($userID) ?></h2>
+                                    <h6 class="text-muted mt-1 mb-2 fw-normal">Followers</h5>
+                                        <a class="button-nopadding six statisticCount" data-bs-toggle="modal" data-bs-target="#followersModal"><?php echo $followerCount ?></a>
                                 </div>
                                 <div class="col-4 border-end border-light">
-                                    <h5 class="text-muted mt-1 mb-2 fw-normal">Following</h5>
-                                    <h2 class="mb-0 fw-bold"><?php echo getFollowingCount($userID) ?></h2>
+                                    <h6 class="text-muted mt-1 mb-2 fw-normal">Following</h5>
+                                        <a class="button-nopadding six statisticCount" data-bs-toggle="modal" data-bs-target="#followingModal"><?php echo $followingCount ?></a>
                                 </div>
                                 <div class="col-4 border-end border-light">
-                                    <h5 class="text-muted mt-1 mb-2 fw-normal">Subscribers</h5>
-                                    <h2 class="mb-0 fw-bold">0</h2>
+                                    <h6 class="text-muted mt-1 mb-2 fw-normal">Subscribers</h5>
+                                        <a class="button-nopadding six statisticCount" data-bs-toggle="modal" data-bs-target="#subscriberModal"><?php echo $subscribersCount ?></a>
                                 </div>
                             </div>
                         </div>
@@ -117,11 +356,11 @@
                 </div> <!-- end col-->
 
                 <div class="col-xl-7">
-                    <section class="card" aria-labelledby="Posts">
+                    <section class="card" role="feed">
                         <div class="card-body">
                             <!-- comment box -->
                             <?php
-                            if ($userID == $sessionUser) {
+                            if ($userID == $sessionUserID) {
                                 ?> 
                                 <form action="submitPost.php" method="post" class="comment-area-box mb-3">
 
@@ -143,7 +382,7 @@
                                                 <option value="2">Subscribers only</option>
                                             </select>
                                             <div class="float-end">
-                                                <button type="submit" class="btn btn-outline-success waves-effect waves-light">Post</button>
+                                                <button type="submit" class="btn btn-outline-primary waves-effect waves-light">Post</button>
                                             </div>
                                         </div>
                                     </div>
@@ -158,22 +397,25 @@
                             <?php
                             $postCount = getPostCountOfUser($userID);
                             if ($postCount == 0) {
-                                if (($userID == $sessionUser)) {
+                                if (($userID == $sessionUserID)) {
 
-                                    echo "<p>You have not not posted anything.</p>";
+                                    echo "<p class='text-center flex-grow-1'>You have not not posted anything.</p>";
                                 } else {
-                                    echo "<p>This user has not posted anything.</p>";
+                                    echo "<p class='text-center flex-grow-1'>This user has not posted anything.</p>";
                                 }
                             } else {
 
                                 while ($row = $posts->fetch_array(MYSQLI_NUM)) {
                                     ?>
 
-                                    <div class="border border-light p-2 mb-3">
-                                        <?php
-                                        $postPrivacy = $row[5];
-                                        if (($userID == $sessionUser) || ($postPrivacy == 0 ) || ($postPrivacy == 1 && $followed)) {
-                                            if (($userID == $sessionUser)) {
+                                    <?php
+                                    $postPrivacy = $row[5];
+                                    if (($userID == $sessionUserID) || ($postPrivacy == 0 ) || ($postPrivacy == 1 && $followed) || ($postPrivacy == 2 && $subscribed)) {
+                                        ?>
+
+                                        <div class="border border-light p-2 mb-3">
+                                            <?php
+                                            if (($userID == $sessionUserID)) {
                                                 ?>
 
                                                 <div class="dropdown float-end">
@@ -184,23 +426,36 @@
                                                         <!-- item-->
                                                         <a href="process_delete.php?postID=<?php echo $row[0] ?>" class="dropdown-item">Delete Post</a>
                                                         <!-- item-->
-                                                        <a href="editPost.php" class="dropdown-item">Edit Post</a>
+                                                        <a href="editPost.php?postID=<?php echo $row[0] ?>" class="dropdown-item">Edit Post</a>
                                                     </div>
                                                 </div>
                                             <?php }
                                             ?>
-                                            <div class="d-flex align-items-start" aria-labelledby="postContent">
-                                                <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="Generic placeholder image">
+                                            <article class="d-flex align-items-start">
+                                                <a href="profile.php?userID=<?= $viewingUser['userID'] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/' . $viewingUser['profilePic'] ?>" alt="Generic placeholder image"></a>
                                                 <div class="w-100">
-                                                    <h5 class=""><a href="viewPost.php?postID=<?php echo $row[0] ?>" class="button four"><?php echo $row[2] ?>   </a> <small class="text-muted"><?php echo time_elapsed_string($row[4]) ?></small></h5>
-                                                    <p class="card-text">
-                                                        <?php echo $row[3] ?></p>
+                                                    <a href="viewPost.php?postID=<?php echo $row[0] ?>" class="button-nopadding six"><?php echo $row[2] ?>   </a> <small class="text-muted"><?php echo time_elapsed_string($row[4]) ?></small>
+                                                    <hr>
+                                                    <section class="card-text">
+                                                        <?php echo $row[3] ?></section>
 
-                                                    <p class="text-right">Posted By: <a href="profile.php?userID=<?php echo $row[1] ?>" class="button four">@<?php echo $viewingUser['username'] ?></a></p>
+                                                    <p class="text-right"><small>Posted By: 
+                                                            <a href="profile.php?userID=<?php echo $row[1] ?>"  class="button-nopadding six">@<?php echo $viewingUser['username'] ?>
+                                                            </a>
+                                                            <?php
+                                                            if ($row[6] == 0) {
+                                                                ?>
+                                                            <?php } else if ($row[6] == 1) { ?>
+                                                                edited <?php echo time_elapsed_string($row[7]) ?>
+                                                                <?php
+                                                            } else {
+                                                                
+                                                            }
+                                                            ?>
+                                                        </small></p>
                                                     <div class="d-flex">
-                                                        <br>
                                                         <?php
-                                                        if ($sessionUser == -1) {
+                                                        if ($sessionUserID == -1) {
                                                             $processLike = "login.php";
                                                         } else {
 
@@ -211,7 +466,7 @@
                                                             <?php
                                                             $likes = getLikesForPost($row[0]);
                                                             $likeOrLikes = ($likes == 1) ? "Like" : "Likes";
-                                                            if ($sessionUser == -1) {
+                                                            if ($sessionUserID == -1) {
                                                                 echo '<span class="material-icons">favorite_border</span>';
                                                             } else {
 
@@ -230,9 +485,8 @@
                                                                 ?> </span>
                                                         </a>
                                                     </div>
-                                                    <hr>
                                                 </div>
-                                            </div>
+                                            </article>
 
                                             <?php
                                             $comments = getCommentsForPost($row[0]);
@@ -240,7 +494,7 @@
                                                 
                                             } else {
                                                 ?>
-                                                <div class="post-user-comment-box" aria-labelledby="postComments">
+                                                <div class="post-user-comment-box">
                                                     <?php
                                                     if ($commentCount > 3) {
                                                         ?>
@@ -263,10 +517,10 @@
                                                             $currCommentingUser = getUserFromID($commentRows[2]);
                                                         }
                                                         ?>
-                                                        <div class="d-flex align-items-start">
-                                                            <img class="me-2 avatar-sm rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="Generic placeholder image">
+                                                        <div class="d-flex align-items-start" role="comment">
+                                                            <a href="profile.php?userID=<?= $currCommentingUser['userID'] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/' . $currCommentingUser['profilePic'] ?>" alt="Generic placeholder image"></a>
                                                             <div class="w-100">
-                                                                <h5 class="mt-0"><a href="profile.php?userID=<?php echo $currCommentingUser['userID'] ?>" class="button four"><?php echo $currCommentingUser['fname'] . ' ' . $currCommentingUser['lname'] ?></a><small class="text-muted"> <?php echo time_elapsed_string($commentRows[4]) ?></small></h5>
+                                                                <a href="profile.php?userID=<?php echo $currCommentingUser['userID'] ?>" class="button-nopadding six"><?php echo $currCommentingUser['fname'] . ' ' . $currCommentingUser['lname'] ?></a><small class="text-muted"> <?php echo time_elapsed_string($commentRows[4]) ?></small><br>
                                                                 <?php echo $commentRows[3] ?>
                                                             </div>
                                                             <?php
@@ -279,8 +533,6 @@
                                                                     <div class="dropdown-menu dropdown-menu-end">
                                                                         <!-- item-->
                                                                         <a href="process_deletecomment.php?commentID=<?php echo $commentRows[0] ?>" class="dropdown-item">Delete comment</a>
-                                                                        <!-- item-->
-                                                                        <a href="logout.php" class="dropdown-item">Edit comment</a>
                                                                     </div>
                                                                 </div>
                                                                 <?php
@@ -289,15 +541,17 @@
                                                         </div>
                                                         <?php
                                                     }
-                                                    if ($sessionUser == -1) {
+                                                    if ($sessionUserID == -1) {
                                                         $commentProcess = "login.php";
+                                                        $placeHolderPic = "images/default.jpg";
                                                     } else {
-                                                        $commentProcess = "process_comment.php?postID=$row[0] . '&userID=' . $row[1] . '&redirectTo=' . 0";
+                                                        $commentProcess = "process_comment.php?postID=" . $row[0] . "&userID=" . $row[1] . "&redirectTo=" . 0;
+                                                        $placeHolderPic = 'images/' . $sessionUser['profilePic'];
                                                     }
                                                     ?>
                                                     <div class="d-flex align-items-start mt-2">
-                                                        <a class="pe-2" href="#">
-                                                            <img src="https://bootdey.com/img/Content/avatar/avatar1.png" class="rounded-circle" alt="Generic placeholder image" height="31">
+                                                        <a class="pe-2" href="profile.php?userID="<?php echo $viewingUser['userID'] ?>>
+                                                            <img src="<?php echo $placeHolderPic ?>" class="rounded-circle" alt="Generic placeholder image" height="31" width="31">
                                                         </a>
                                                         <form class="d-flex" method="post" action="<?php echo $commentProcess ?>">
                                                             <input type="text" id="comment" name="comment" class="form-control border-0 form-control-sm me-2" required placeholder="Add comment">
@@ -321,7 +575,7 @@
                 <!-- end row-->
             </div>
         </div>
-    </div>
+    </main>
     <?php
     include "footer.inc.php"
     ?>

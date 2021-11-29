@@ -6,6 +6,36 @@
  * and open the template in the editor.
  */
 
+function time_elapsed_string_short($datetime, $full = false) {
+    $now = new DateTime;
+    $ago = new DateTime($datetime);
+    $diff = $now->diff($ago);
+
+    $diff->w = floor($diff->d / 7);
+    $diff->d -= $diff->w * 7;
+
+    $string = array(
+        'y' => 'y',
+        'm' => 'm',
+        'w' => 'w',
+        'd' => 'd',
+        'h' => 'hr',
+        'i' => 'min',
+        's' => 'sec',
+    );
+    foreach ($string as $k => &$v) {
+        if ($diff->$k) {
+            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
+        } else {
+            unset($string[$k]);
+        }
+    }
+
+    if (!$full)
+        $string = array_slice($string, 0, 1);
+    return $string ? implode(', ', $string) . ' ago' : 'just now';
+}
+
 function time_elapsed_string($datetime, $full = false) {
     $now = new DateTime;
     $ago = new DateTime($datetime);
@@ -132,6 +162,7 @@ function getUserFromUsername($id) {
         $stmt = $conn->prepare("SELECT * FROM users WHERE username =?");
         //Bind & Execute the query statement:
         $stmt->bind_param("i", $id);
+        
         if (!$stmt->execute()) {
             $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
             $success = false;
@@ -152,13 +183,17 @@ function searchPostCount($query) {
         $postSearchSuccess = false;
     } else {
         $splited_query = explode(' ', $query);
-        $sql_prep = "SELECT count(*) FROM post WHERE title OR content LIKE ?";
+        $sql_prep = "SELECT count(*) FROM post WHERE title LIKE ? OR content LIKE ?";
         $splited_query[0] = "%$splited_query[0]%";
-        $types = "s";
+        $param = array_fill(0, 2, $splited_query[0]);
+        $types = "ss";
         for ($i = 1; $i < count($splited_query); $i++) {
-            $sql_prep = $sql_prep . " OR title OR content LIKE ?";
-            $types = $types . "s";
+            $sql_prep = $sql_prep . " OR title LIKE ? OR content LIKE ?";
+            $types = $types . "ss";
             $splited_query[$i] = "%$splited_query[$i]%";
+            for ($j = 0; $j < 2; $j++) {
+                array_push($param, $splited_query[$i]);
+            }
         }
 
         //Create database connection
@@ -173,7 +208,7 @@ function searchPostCount($query) {
             //Prepare the statement:
             $stmt = $conn->prepare($sql_prep);
             //Bind & Execute the query statement:
-            $stmt->bind_param($types, ...$splited_query);
+            $stmt->bind_param($types, ...$param);
             if (!$stmt->execute()) {
                 $postSearchErrorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
                 $postSearchSuccess = false;
@@ -196,13 +231,17 @@ function getPostsRelatedToQuery($query) {
         $postSearchSuccess = false;
     } else {
         $splited_query = explode(' ', $query);
-        $sql_prep = "SELECT * FROM post WHERE title OR content LIKE ?";
+        $sql_prep = "SELECT * FROM post WHERE title LIKE ? OR content LIKE ?";
         $splited_query[0] = "%$splited_query[0]%";
-        $types = "s";
+        $param = array_fill(0, 2, $splited_query[0]);
+        $types = "ss";
         for ($i = 1; $i < count($splited_query); $i++) {
-            $sql_prep = $sql_prep . " OR title OR content LIKE ?";
-            $types = $types . "s";
+            $sql_prep = $sql_prep . " OR title LIKE ? OR content LIKE ?";
+            $types = $types . "ss";
             $splited_query[$i] = "%$splited_query[$i]%";
+            for ($j = 0; $j < 2; $j++) {
+                array_push($param, $splited_query[$i]);
+            }
         }
 
         //Create database connection
@@ -215,9 +254,10 @@ function getPostsRelatedToQuery($query) {
             $postSearchSuccess = false;
         } else {
             //Prepare the statement:
+            $sql_prep .= " ORDER BY postedDateTime DESC";
             $stmt = $conn->prepare($sql_prep);
             //Bind & Execute the query statement:
-            $stmt->bind_param($types, ...$splited_query);
+            $stmt->bind_param($types, ...$param);
             if (!$stmt->execute()) {
                 $postSearchErrorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
                 $postSearchSuccess = false;
@@ -238,13 +278,17 @@ function searchUserNameCount($query) {
         $userSearchSuccess = false;
     } else {
         $splited_query = explode(' ', $query);
-        $sql_prep = "SELECT count(*) FROM users WHERE username OR fname OR lname OR email LIKE ?";
+        $sql_prep = "SELECT count(*) FROM users WHERE username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?";
         $splited_query[0] = "%$splited_query[0]%";
-        $types = "s";
+        $param = array_fill(0, 4, $splited_query[0]);
+        $types = "ssss";
         for ($i = 1; $i < count($splited_query); $i++) {
-            $sql_prep = $sql_prep . " OR username OR fname OR lname OR email LIKE ?";
-            $types = $types . "s";
+            $sql_prep = $sql_prep . " OR username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?";
+            $types = $types . "ssss";
             $splited_query[$i] = "%$splited_query[$i]%";
+            for ($j = 0; $j < 4; $j++) {
+                array_push($param, $splited_query[$i]);
+            }
         }
         //Create database connection
         $config = parse_ini_file('../../private/db-config.ini');
@@ -259,7 +303,7 @@ function searchUserNameCount($query) {
             $stmt = $conn->prepare($sql_prep);
 
             //Bind & Execute the query statement:
-            $stmt->bind_param($types, ...$splited_query);
+            $stmt->bind_param($types, ...$param);
             if (!$stmt->execute()) {
                 $userSearchErrorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
                 $userSearchSuccess = false;
@@ -282,13 +326,17 @@ function getUserByUserName($query) {
         $userSearchSuccess = false;
     } else {
         $splited_query = explode(' ', $query);
-        $sql_prep = "SELECT * FROM users WHERE username OR fname OR lname OR email LIKE ?";
+        $sql_prep = "SELECT * FROM users WHERE username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?";
         $splited_query[0] = "%$splited_query[0]%";
-        $types = "s";
+        $param = array_fill(0, 4, $splited_query[0]);
+        $types = "ssss";
         for ($i = 1; $i < count($splited_query); $i++) {
-            $sql_prep = $sql_prep . " OR username OR fname OR lname OR email LIKE ?";
-            $types = $types . "s";
+            $sql_prep = $sql_prep . " OR username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?";
+            $types = $types . "ssss";
             $splited_query[$i] = "%$splited_query[$i]%";
+            for ($j = 0; $j < 4; $j++) {
+                array_push($param, $splited_query[$i]);
+            }
         }
         //Create database connection
         $config = parse_ini_file('../../private/db-config.ini');
@@ -303,7 +351,7 @@ function getUserByUserName($query) {
             $stmt = $conn->prepare($sql_prep);
 
             //Bind & Execute the query statement:
-            $stmt->bind_param($types, ...$splited_query);
+            $stmt->bind_param($types, ...$param);
             if (!$stmt->execute()) {
                 $userSearchErrorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
                 $userSearchSuccess = false;
@@ -424,6 +472,44 @@ function checkIfPostExist($postID) {
         return true;
     }
 }
+function getSubscribers($userID){
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $sql = 'SELECT * FROM users INNER JOIN subscribers ON users.userID = subscribers.userID WHERE subscribers.subscriberID = ?';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $userID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+    $conn->close();
+    return $result;
+}
+
+function getFollowers($userID){
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $sql = 'SELECT * FROM users INNER JOIN followers ON users.userID = followers.followerID WHERE followers.userID = ?';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $userID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+    $conn->close();
+    return $result;
+}
+function getFollowing($userID){
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $sql = 'SELECT * FROM users INNER JOIN followers ON users.userID = followers.userID WHERE followers.followerID = ?';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $userID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+    $conn->close();
+    return $result;
+}
+
 
 function getFollowerCount($userID) {
     $config = parse_ini_file('../../private/db-config.ini');
@@ -606,7 +692,7 @@ function getTotalCategoriesCount() {
 // related 1 = comment
 // related 2 = follow
 // related 3 = subscribe
-function processNotifications($userID, $content, $related, $fromUserID,$relatedContentID = 0) {
+function processNotifications($userID, $content, $related, $fromUserID, $relatedContentID = 0) {
     //Create database connection
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
@@ -623,13 +709,14 @@ function processNotifications($userID, $content, $related, $fromUserID,$relatedC
             $stmt->bind_param("issii", $userID, $content, $dateTimeNow, $related, $fromUserID);
         } else {
             $stmt = $conn->prepare("INSERT into notifications (userID,notificationContent,notificationDateTime,related,relatedID,relatedContentID) VALUES (?,?,?,?,?,?)");
-            $stmt->bind_param("issiii", $userID, $content, $dateTimeNow, $related, $fromUserID,$relatedContentID);
+            $stmt->bind_param("issiii", $userID, $content, $dateTimeNow, $related, $fromUserID, $relatedContentID);
         }
         //Bind & Execute the query statement:
         if (!$stmt->execute()) {
             $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
             $success = false;
         } else {
+            
         }
         $stmt->close();
     }
@@ -647,7 +734,7 @@ function getNotification($userID) {
         $success = false;
     } else {
         //Prepare the statement:
-        $stmt = $conn->prepare("SELECT * FROM notifications WHERE userID=?");
+        $stmt = $conn->prepare("SELECT * FROM notifications WHERE userID=? ORDER BY notificationDateTime DESC");
         //Bind & Execute the query statement:
         $stmt->bind_param("i", $userID);
         if (!$stmt->execute()) {
@@ -687,6 +774,82 @@ function getNotificationCount($userID) {
     }
     $conn->close();
     return $notificationCount;
+}
+
+function getUserInterestCategories($userID) {
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+    } else {
+        //Prepare the statement:
+        $stmt = $conn->prepare("SELECT * FROM interest WHERE userID = ?");
+        //Bind & Execute the query statement:
+        $stmt->bind_param("i", $userID);
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        } else {
+            $result = $stmt->get_result();
+        }
+        $stmt->close();
+    }
+    $conn->close();
+    return $result;
+}
+
+function getUserSubscribedList($userID) {
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $stmt = $conn->prepare("SELECT * FROM subscribers WHERE scriberID = ?");
+    $stmt->bind_param("i", $userID);
+    $following = array($userID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($rows = $result->fetch_array(MYSQLI_NUM)) {
+        array_push($following, $rows[1]);
+    }
+    $stmt->close();
+    $conn->close();
+    return $following;
+}
+
+function checkIfSubscribed($userID, $currUserID) {
+    if ($userID == $currUserID) {
+        return true;
+    } else {
+
+        $config = parse_ini_file('../../private/db-config.ini');
+        $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+        $stmt = $conn->prepare("SELECT count(*) AS count FROM subscribers WHERE userID = ? AND subscriberID = ? AND endDate > NOW()");
+        $stmt->bind_param("ii", $userID, $currUserID);
+        $stmt->execute();
+        $rows = $stmt->get_result()->fetch_row()[0];
+        $stmt->close();
+        $conn->close();
+        if ($rows == 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+}
+
+function getSubscribersCount($userID) {
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $sql = 'select count(*) from subscribers WHERE userID =? AND endDate > NOW()';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $userID);
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_row()[0];
+    $stmt->close();
+    $conn->close();
+    return $rows;
 }
 
 ?>

@@ -5,7 +5,8 @@
     ?>
     <body>
         <?php
-        include "nav.inc.php"
+        include "nav.inc.php";
+        $categoriesResults = getAllCategories();
         ?>
         <main class="container-fluid vh-100" style="margin-top:100px">
             <div class="" style="margin-top:100px">
@@ -47,20 +48,15 @@
                                     <input class="form-control" type="password" id="pwd_confirm" name="pwd_confirm" required placeholder="Confirm password">
                                 </div>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text bg-primary"><i
-                                            class="bi bi-book text-white"></i></span>
-                                    <input class="form-control" type="interest" id="int1" name="int1" required placeholder="Insert your first interest(if any)">
+                                    <span class="input-group-text bg-primary text-white"><i
+                                            class="bi bi-bookmark-heart"></i>  Interests</span>
                                 </div>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text bg-primary"><i
-                                            class="bi bi-book text-white"></i></span>
-                                    <input class="form-control" type="interest" id="int2" name="int2" required placeholder="Insert your second interest(if any)">
-                                </div>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text bg-primary"><i
-                                            class="bi bi-book text-white"></i></span>
-                                    <input class="form-control" type="interest" id="int3" name="int3" required placeholder="Insert your third interest(if any)">
-                                </div>
+                                <?php while ($row = $categoriesResults->fetch_array(MYSQLI_NUM)) { ?>
+                                    <input type="checkbox" class="btn-check" name="interest[]" id="btn-check<?php echo $row[0] ?>" autocomplete="off" value="<?php echo $row[0] ?>"/>
+                                    <label class="btn btn-outline-dark" for="btn-check<?php echo $row[0] ?>"><?php echo $row[1]; ?></label>
+                                <?php } ?>
+
+                                <br>
 
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">

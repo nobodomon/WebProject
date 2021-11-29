@@ -8,6 +8,21 @@ and open the template in the editor.
     Author     : Kenneth Lee
 */
 
+.statisticCount{
+    font-size:21px !important;
+}
+
+.notiTimeStamp{
+    text-align: right !important;
+    margin-bottom: 0px;
+}
+
+.deleteNoti{
+    margin-right: 5px;
+    padding: 0px 10px;
+    border-right: 2px solid black;
+}
+
 .logo{
     width: 35px;
     height: 35px;
@@ -101,7 +116,6 @@ nav{
     border: 1px solid #dee2e6;
     border-radius: .25rem;
     max-width: 100%;
-    height: auto;
 }
 .avatar-sm {
     height: 2.25rem;
@@ -125,14 +139,14 @@ nav{
     background-color: transparent!important;
 }
 .post-user-comment-box {
-    background-color: #f2f8fb;
+    background-color: #fbf5f2;
     margin: 0 -.75rem;
     padding: 1rem;
     margin-top: 20px;
     display: none;
 }
 .post-user-comment-box-viewPost {
-    background-color: #f2f8fb;
+    background-color: #fbf5f2;
     margin: 0 -.75rem;
     padding: 1rem;
     margin-top: 20px;
@@ -180,7 +194,7 @@ nav{
     color: #adb5bd;
 }
 .comment-area-box .comment-area-btn {
-    background-color: #f2f8fb;
+    background-color: #fbf5f2;
     padding: 10px;
     border: 1px solid #dee2e6;
     border-top: none;
@@ -260,6 +274,8 @@ nav{
 
 .notification-box{
     opacity: 0;
+    position:absolute !important;
+    top:35px;
 }
 
 .dropdown:hover .dropdown-menu {
@@ -280,6 +296,7 @@ nav{
     bottom:15px;
     position:relative;
 }
+
 
 @keyframes fade{
     0%,10%{

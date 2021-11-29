@@ -6,6 +6,14 @@
 	padding: 10px;
 }
 
+.button-nopadding{
+	text-decoration: none;
+	color: #212529;
+	font-size: 18px;
+        font-weight: bold;
+	position: relative;
+}
+
 /* BUTTON EEN */
 
 a.button.one:before, a.button.one:after{
@@ -202,6 +210,26 @@ a.button.six:after{
 }
 
 a.button.six:hover:after{
+	opacity: 1;
+	height: 100%;
+	
+	transition: all 0.3s ease;
+}
+
+a.button-nopadding.six:after{
+	content: '';
+	width: 100%;
+	height: 120%;
+	top: 0;
+	left: 0;
+	position: absolute;
+	border-bottom: 2px solid ;
+	opacity: 0;
+	
+	transition: all .2s ease;
+}
+
+a.button-nopadding.six:hover:after{
 	opacity: 1;
 	height: 100%;
 	

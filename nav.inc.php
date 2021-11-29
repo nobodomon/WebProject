@@ -10,9 +10,12 @@ if (!isset($_SESSION)) {
     session_start();
 }
 ?>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation">
     <div class="container-fluid">
-        <a class="navbar-brand" href="index.php" class='logo'>stori</a>
+        <a class="navbar-brand" href="index.php" class='logo'>
+            <img src="images/favicon.png" alt="logo" width="30" height="30" class="d-inline-block align-text-top">
+            stori
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -31,13 +34,13 @@ if (!isset($_SESSION)) {
                                     <span class="material-icons">emoji_people</span><span class="small"> Register</span>
                                 </a>
                             </li>
+                            
+                            <li><hr class="dropdown-divider"></li>
                             <li class="nav-item">
                                 <a class="dropdown-item d-flex flex-row align-items-center" href="login.php">
                                     <span class="material-icons">login</span><span class="small"> Login</span>
                                 </a>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
                         </ul>
                     </li>
                     <?php
@@ -66,7 +69,7 @@ if (!isset($_SESSION)) {
                     ?>
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="material-icons">
                                 notifications
                             </span>
@@ -99,10 +102,10 @@ if (!isset($_SESSION)) {
                                 <?php
                                 while ($notification = $notificationsList->fetch_array(MYSQLI_NUM)) {
                                     if ($notificationUserID == -1) {
-                                        $notificationUserID = $notification[1];
+                                        $notificationUserID = $notification[5];
                                         $notificationUser = getUserFromID($notificationUserID);
-                                    } else if ($notificationUserID != $notification[1]) {
-                                        $notificationUserID = $notification[1];
+                                    } else if ($notificationUserID != $notification[5]) {
+                                        $notificationUserID = $notification[5];
                                         $notificationUser = getUserFromID($notificationUserID);
                                     }
                                     ?>
@@ -121,24 +124,26 @@ if (!isset($_SESSION)) {
                                                 $href = "profile.php?userID=" . $notification[5];
                                                 break;
                                             case 3:
-                                                $href = "viewPost.php?postID=" . $notification[6];
+                                                $href = "profile.php?userID=" . $notification[5];
                                                 break;
                                             default:
 
                                         endswitch;
                                         ?>
                                         <div class="d-flex">
-                                            <a href="process_deleteNotification.php?notificationID=<?php echo $notification[0] ?>" class ="align-self-center">
-                                                <span class="material-icons">
+                                            <a href="process_deleteNotification.php?notificationID=<?php echo $notification[0] ?>" class ="d-flex deleteNoti button-nopadding">
+                                                <span class="material-icons align-self-center">
                                                     clear
                                                 </span>
                                             </a>
-                                            <div class="flex-grow-1">
-                                                <a href="profile.php?userID=<?php echo $notification[5] ?>">@<?php echo $notificationUser["username"] ?></a> 
-                                                <br>
-                                                <?php echo $notification[2] ?>
+                                            <div class="d-flex flex-column flex-grow-1">
+                                                <div class="d-flex flex-grow-1 notiHeader align-items-center">
+                                                    <a href="profile.php?userID=<?php echo $notification[5] ?>" class="button-nopadding small">@<?php echo $notificationUser["username"] ?></a> 
+                                                    <p class="notiTimeStamp flex-grow-1 align-self-stretch"><?php echo time_elapsed_string_short($notification[3]) ?></p>
+                                                </div>
+                                                <span><?php echo $notification[2] ?></span>
                                             </div>
-                                            <a href="<?php echo $href ?>" class ="align-self-center">
+                                            <a href="<?php echo $href ?>" class ="align-self-center button-nopadding">
                                                 <span class="material-icons">
                                                     chevron_right
                                                 </span>
@@ -155,14 +160,11 @@ if (!isset($_SESSION)) {
                     </ul>
                 </li>
             </ul>
-
-            <form class="d-flex" action="process_search.php" method="post">
+            <form class="d-flex" action="process_search.php" method="post" aria-label="search box">
                 <div class="input-group" >
-                    <input type="text" class="form-control" placeholder="Search..." name = "query" id = "query" required>
-                    <button class="btn btn-outline-success" type="submit">
-                        <span class="material-icons">
-                            search
-                        </span>
+                    <input type="text" class="form-control" placeholder="Search..." name = "query" id = "query" required role="searchbox">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="bi bi-search"></i>
                     </button>
                 </div>
             </form>
