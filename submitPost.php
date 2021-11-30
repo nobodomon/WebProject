@@ -10,10 +10,12 @@
         <?php
         $title = $errorMsg = "";
         $success = true;
-        if (empty($_POST["title"]) || empty($_POST["content"])) {
+        if (empty($_POST["title"]) || empty($_POST["content"]) || empty($_POST["interest"])) {
+            $interests = array();
             $errorMsg .= "Title and content is required.<br>";
             $success = false;
         } else {
+            $interests = $_POST["interest"];
             $title = $_POST['title'];
             $content = $_POST['content'];
             $postType = $_POST['postType'];
@@ -24,24 +26,20 @@
             //$h4 = "<h4>Thank you for signing up, ". $_POST["lname"]. " " . $_POST["fname"] ."</h4>";
             //$btn = "<a href='#'><button class = 'btn btn-success'>Log-in </button></a><br>";
             if (createPost()) {
-                
+
+                include("resources/templates/successpage.php");
             } else {
-                $h3 = "<h3>Oops!";
-                $h4 = "<h4>The following input errors were detected:</h4>";
-                $errors = "<p>" . $errorMsg . "</p>";
-                $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
+
+                include("resources/templates/errorpage.php");
             }
         } else {
-            $h3 = "<h3>Oops!";
-            $h4 = "<h4>The following input errors were detected:</h4>";
-            $errors = "<p>" . $errorMsg . "</p>";
-            $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
+            
         }
 
         function validatePostType() {
             global $postType, $success, $errorMsg;
             $allowedPostTypes = array(0, 1, 2);
-            if (in_array((int)$postType, $allowedPostTypes, true)) {
+            if (in_array((int) $postType, $allowedPostTypes, true)) {
                 $success = true;
             } else {
                 $success = false;
@@ -50,7 +48,7 @@
         }
 
         function createPost() {
-            global $success, $errorMsg, $title, $content, $postType;
+            global $success, $successMsg, $errorMsg, $title, $content, $postType, $interests;
             $sanitizedContent = htmLawed($content);
             $config = parse_ini_file('../../private/db-config.ini');
             $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
@@ -66,38 +64,33 @@
                     $errorMsg .= "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
                     $success = false;
                 } else {
-                    $success = true;
+                    // retrieve the post id
+                    $stmt1 = $conn->prepare("SELECT * FROM post WHERE author_id = ? AND title = ? AND content = ? AND postType = ?");
+                    $stmt1->bind_param("issi", $_SESSION["userID"], $title, $sanitizedContent, $postType);
+                    $stmt1->execute();
+                    $result = $stmt1->get_result();
+                    $post = $result->fetch_assoc();
+
+                    foreach ($interests as $interest) {
+                        $stmt2 = $conn->prepare("INSERT INTO categoryForPost(postID, categoryID) VALUES(?,?)");
+                        $stmt2->bind_param("ii", $post["post_id"], $interest);
+                        if (!$stmt2->execute()) {
+                            $errorMsg .= "Execute failed: (" . $stmt2->errno . ") " . $stmt2->error;
+                            $success = false;
+                            break;
+                        } else {
+                            $successMsg = "Post successfully created!";
+                            $success = true;
+                        }
+                        $stmt2->close();
+                    }
+                    $stmt1->close();
                 }
                 $stmt->close();
             }
             $conn->close();
             return $success;
         }
-        ?>
-        <main class="container">
-            <div class="page-wrap d-flex flex-row align-items-center">
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-md-12 text-center">
-                            <?php if ($success) { ?>
-
-                                <span class="display-1 d-block">Yay!</span>
-                                <div class="mb-4 lead">Your post was created successfully!</div>
-                                <a href="index.php" class="btn btn-link">Back to Home</a>
-                            <?php } else { ?>
-
-                                <span class="display-1 d-block">Oops!</span>
-                                <div class="mb-4 lead">The following errors are detected: </div>
-                                <p><?php echo $errorMsg ?></p>
-                                <a href="index.php" class="btn btn-link">Back to Home</a>
-
-                            <?php } ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-        <?php
         include "footer.inc.php"
         ?>
     </body>

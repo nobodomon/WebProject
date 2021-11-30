@@ -49,7 +49,7 @@
                                 ?>
                                 <article class="card mt-3">
                                     <div class="card-body d-flex align-items-start">
-                                        <a href="profile.php?userID=<?=$userRows[0]?>"><img class="me-2 avatar-sm rounded-circle" src="<?='images/'.$userRows[8]?>" alt="Generic placeholder image"></a>
+                                        <a href="profile.php?userID=<?=$userRows[0]?>"><img class="me-2 avatar-sm rounded-circle" src="<?='images/profilepics/'.$userRows[8]?>" alt="Generic placeholder image"></a>
                                         <div class="flex-grow-1">
                                             <a href="profile.php?userID=<?=$userRows[0]?>" class="button-nopadding six"><?php echo $userRows[1] ?></a>
                                             <p class="card-text">
@@ -106,7 +106,7 @@
                                 ?>
                                 <article class="card mt-3">
                                     <div class="card-body d-flex align-items-start">
-                                        <a href="profile.php?userID=<?= $postRows[1] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?= 'images/' . $author['profilePic'] ?>" alt="Generic placeholder image">
+                                        <a href="profile.php?userID=<?= $postRows[1] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?= 'images/profilepics' . $author['profilePic'] ?>" alt="Generic placeholder image">
                                             <div class="flex-grow-1">
                                                 <a href="viewPost.php?postID=<?= $postRows[0] ?>" class="button-nopadding six"><?php echo $postRows[2] ?></a> <small class="text-muted"><?php echo time_elapsed_string($postRows[4]) ?></small>
                                                 <p class="card-text">

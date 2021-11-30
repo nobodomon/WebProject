@@ -160,7 +160,7 @@ if (!isset($_SESSION)) {
                     </ul>
                 </li>
             </ul>
-            <form class="d-flex" action="process_search.php" method="post" aria-label="search box">
+            <form class="searchBox" action="process_search.php" method="post" aria-label="search box">
                 <div class="input-group" >
                     <input type="text" class="form-control" placeholder="Search..." name = "query" id = "query" required role="searchbox">
                     <button class="btn btn-outline-primary" type="submit">

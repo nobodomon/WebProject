@@ -10,6 +10,11 @@
         <?php
         $title = $errorMsg = "";
         $success = true;
+        if(empty($_POST["interest"])){
+            $interests = array();
+        }else{
+            $interests = $_POST["interest"];
+        }
         if (empty($_POST["title"]) || empty($_POST["content"])) {
             $errorMsg .= "Title and content is required.<br>";
             $success = false;
@@ -51,7 +56,7 @@
         }
 
         function editPost() {
-            global $success, $errorMsg, $title, $content, $postType, $postID;
+            global $success, $errorMsg, $title, $content, $postType, $postID, $interests;
             $sanitizedContent = htmLawed($content);
             $config = parse_ini_file('../../private/db-config.ini');
             $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
@@ -70,6 +75,16 @@
                     $success = false;
                 } else {
                     $success = true;
+                    $stmt1 = $conn->prepare("DELETE FROM categoryForPost WHERE postID = ?");
+                    $stmt1->bind_param("i", $postID);
+                    $stmt1->execute();
+                    $stmt1->close();
+                    foreach ($interests as $interest) {
+                        $stmt2 = $conn->prepare("INSERT INTO categoryForPost(postID, categoryID) VALUES(?,?)");
+                        $stmt2->bind_param("ii", $postID, $interest);
+                        $stmt2->execute();
+                        $stmt2->close();
+                    }
                 }
                 $stmt->close();
             }

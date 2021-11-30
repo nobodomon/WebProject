@@ -852,4 +852,109 @@ function getSubscribersCount($userID) {
     return $rows;
 }
 
+function getInterestByPostID($postID) {
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+    } else {
+        //Prepare the statement:
+        $stmt = $conn->prepare("SELECT * FROM categoryForPost INNER JOIN categories ON categoryForPost.categoryID = categories.categoryID WHERE postID = ?");
+        //Bind & Execute the query statement:
+        $stmt->bind_param("i", $postID);
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        } else {
+            $result = $stmt->get_result();
+        }
+        $stmt->close();
+    }
+    $conn->close();
+    return $result;
+}
+
+function getPostInterestTags($postID) {
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+    } else {
+        //Prepare the statement:
+        $stmt = $conn->prepare("SELECT * FROM categoryForPost WHERE postID = ?");
+        //Bind & Execute the query statement:
+        $stmt->bind_param("i", $postID);
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        } else {
+            $result = $stmt->get_result();
+        }
+        $stmt->close();
+    }
+    $conn->close();
+    return $result;
+}
+
+function getPostTagCount($postID) {
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+    } else {
+        //Prepare the statement:
+        $stmt = $conn->prepare("SELECT count(*) FROM categoryForPost INNER JOIN categories ON categoryForPost.categoryID = categories.categoryID WHERE postID = ?");
+        //Bind & Execute the query statement:
+        $stmt->bind_param("i", $postID);
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        } else {
+            $rows = $stmt->get_result()->fetch_row()[0];
+        }
+        $stmt->close();
+    }
+    $conn->close();
+    return $rows;
+}
+
+function getInterestCount($userID) {
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+    } else {
+        //Prepare the statement:
+        $stmt = $conn->prepare("SELECT count(*) FROM interest WHERE userID = ?");
+        //Bind & Execute the query statement:
+        $stmt->bind_param("i", $userID);
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        } else {
+            $rows = $stmt->get_result()->fetch_row()[0];
+        }
+        $stmt->close();
+    }
+    $conn->close();
+    return $rows;
+}
+
+
 ?>

@@ -17,7 +17,7 @@ $conn = new mysqli($config['servername'], $config['username'], $config['password
     {
       $profileImagename = $userID . '_.jpg';
 
-      $target = "images/" . $profileImagename;
+      $target = "images/profilepics/" . $profileImagename;
       $img_tmpName = $_FILES['profileImage']['tmp_name'];
       
         if (move_uploaded_file($img_tmpName, $target))

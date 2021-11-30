@@ -7,6 +7,15 @@ and open the template in the editor.
     Created on : Sep 8, 2021, 7:58:07 PM
     Author     : Kenneth Lee
 */
+body{
+    
+    min-height: 100vh;
+    display:flex;
+    flex-direction: column;
+}
+.searchBox{
+    margin-bottom:0px;
+}
 
 .statisticCount{
     font-size:21px !important;
@@ -46,10 +55,10 @@ figcaption{
 }
 
 footer{
-    border-top: solid grey;
     padding: 15px;
     text-align: center;
     font-size:0.8em;
+    margin-top:auto;
 }
 
 .pop-up{
@@ -260,23 +269,10 @@ nav{
 }
 
 
-.navbar-nav>li>.notification-box{
-    padding-left:15px;
-    padding-right:15px;
-    width:325px;
-    max-height:600px;
-    overflow:auto;
-}
-
 .dropdown-menu{
     opacity: 0;
 }
 
-.notification-box{
-    opacity: 0;
-    position:absolute !important;
-    top:35px;
-}
 
 .dropdown:hover .dropdown-menu {
     display: block;
@@ -285,11 +281,27 @@ nav{
     margin-top: 0; // remove the gap so it doesn't close
 }
 
+.navbar-nav>li>.notification-box{
+    padding-left:15px;
+    padding-right:15px;
+    width:325px;
+    max-height:600px;
+    overflow:auto;
+    opacity: 0;
+    position:absolute !important;
+}
+
 .dropdown:hover .notification-box {
     display: block;
+    position: absolute !important;
     animation: 0.25s linear fade;
     opacity:1;
-    margin-top: 0; // remove the gap so it doesn't close
+    top:35px;
+    padding-left:15px;
+    padding-right:15px;
+    width:325px;
+    max-height:600px;
+    overflow:auto;
 }
 
 .notificationBadge{

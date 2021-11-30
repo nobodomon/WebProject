@@ -13,7 +13,11 @@
         $errorMsg = "";
         $success = true;
         $newUsername = "";
-        $interests = $_POST["interest"];
+        if(empty($_POST["interest"])){
+            $interests = array();
+        }else{
+            $interests = $_POST["interest"];
+        }
         $h4 = "";
         $btn = "";
 //      check if any fields are empty

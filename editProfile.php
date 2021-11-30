@@ -38,7 +38,7 @@
                                 </div>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text bg-primary text-white"><i
-                                            class="bi bi-key-fill text-white"></i>  Biography</span>
+                                            class="bi bi-person text-white"></i>  Biography</span>
                                     <input class="form-control" type="text" id="biography" name="biography" value="<?php echo $userResults['biography']; ?>">
                                 </div>
                                 <div class="input-group mb-3">
