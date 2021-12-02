@@ -33,6 +33,10 @@
     animation-timing-function: ease-in;
     animation-fill-mode: forwards;
     animation-iteration-count: 1;
+    min-height: 408px;
+    max-height: 408px;
+    overflow-y: visible;
+    
 }
 .shadow-lg.second{
     transform:scale(0,0) translateY(-10px);
@@ -43,6 +47,9 @@
     animation-timing-function: ease-in;
     animation-fill-mode: forwards;
     animation-iteration-count: 1;
+    min-height: 408px;
+    max-height: 408px;
+    overflow-y: visible;
 }
 .shadow-lg.third{
     transform:scale(0,0) translateY(-10px);
@@ -53,6 +60,9 @@
     animation-timing-function: ease-in;
     animation-fill-mode: forwards;
     animation-iteration-count: 1;
+    min-height: 408px;
+    max-height: 408px;
+    overflow-y: visible;
 }
 .shadow-lg.fourth{
     transform:scale(0,0) translateY(-10px);
@@ -63,6 +73,9 @@
     animation-timing-function: ease-in;
     animation-fill-mode: forwards;
     animation-iteration-count: 1;
+    min-height: 408px;
+    max-height: 408px;
+    overflow-y: visible;
 }
 .border-0 {
     border: 0 !important;

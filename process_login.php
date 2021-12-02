@@ -19,7 +19,7 @@
             $pwd = $_POST["pwd"];
             // Additional check to make sure e-mail address is well  -formed.
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errorMsg = $errorMsg . "Invalid email format.<br>";
+                $errorMsg = $errorMsg . "Invalid email format.";
                 $success = false;
             }
         }
@@ -33,7 +33,7 @@
         }
 
         function retrieveMemberFromDB() {
-            global $userID, $email, $pwd, $lname, $fname, $h3, $h4, $btn, $errorMsg, $successMsg, $success;
+            global $userID, $email, $pwd, $lname, $fname, $errorMsg, $successMsg, $success;
 
             //Create database connection
             $config = parse_ini_file('../../private/db-config.ini');
@@ -54,21 +54,22 @@
                 } else {
                     $result = $stmt->get_result();
                     $user = $result->fetch_assoc();
-                    if (password_verify($pwd, $user["password"])) {
-                        $lname = $user['lname'];
-                        $fname = $user['fname'];
-                        $userID = $user['userID'];
-                        if (!isset($_SESSION)) {
-                            session_start();
-                        }
-                        $_SESSION["userID"] = $user['userID'];
-                        $_SESSION["fname"] = $user['fname'];
-                        $_SESSION["lname"] = $user['lname'];
-                        $successMsg = "You have successfully logged in!";
-                        $success = true;
-                    } else {
-                        $errorMsg = "E-mail or passwords do not seem to match...";
+                    if ($user == null) {
                         $success = false;
+                        $errorMsg .= "E-mail does not exist.";
+                    } else {
+                        if (password_verify($pwd, $user["password"])) {
+                            $userID = $user['userID'];
+                            if (!isset($_SESSION)) {
+                                session_start();
+                            }
+                            $_SESSION["userID"] = $userID;
+                            $successMsg = "You have successfully logged in!";
+                            $success = true;
+                        } else {
+                            $errorMsg .= "E-mail or passwords do not seem to match...";
+                            $success = false;
+                        }
                     }
                 }
                 $stmt->close();

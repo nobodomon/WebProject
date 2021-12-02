@@ -12,28 +12,41 @@
         $success = true;
         if (empty($_POST["title"]) || empty($_POST["content"]) || empty($_POST["interest"])) {
             $interests = array();
-            $errorMsg .= "Title and content is required.<br>";
+            $errorMsg .= "Title and content and interest is required.<br>";
             $success = false;
         } else {
-            $interests = $_POST["interest"];
+            if (empty($_POST["interest"])) {
+                $interests = array();
+            } else {
+                $interests = $_POST["interest"];
+            }
             $title = $_POST['title'];
-            $content = $_POST['content'];
-            $postType = $_POST['postType'];
-            validatePostType();
+            if (strlen($title) > 255) {
+                $success = false;
+                $errorMsg .= "Title is too long!";
+            } else {
+                $content = $_POST['content'];
+                $postType = $_POST['postType'];
+                validatePostType();
+            }
         }
         if ($success) {
             //$h3 = "<h3>Your Registration successful!</h3>";
             //$h4 = "<h4>Thank you for signing up, ". $_POST["lname"]. " " . $_POST["fname"] ."</h4>";
             //$btn = "<a href='#'><button class = 'btn btn-success'>Log-in </button></a><br>";
             if (createPost()) {
-
-                include("resources/templates/successpage.php");
+                
             } else {
-
-                include("resources/templates/errorpage.php");
+                $h3 = "<h3>Oops!";
+                $h4 = "<h4>The following input errors were detected:</h4>";
+                $errors = "<p>" . $errorMsg . "</p>";
+                $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
             }
         } else {
-            
+            $h3 = "<h3>Oops!";
+            $h4 = "<h4>The following input errors were detected:</h4>";
+            $errors = "<p>" . $errorMsg . "</p>";
+            $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
         }
 
         function validatePostType() {
@@ -90,6 +103,12 @@
             }
             $conn->close();
             return $success;
+        }
+
+        if ($success) {
+            include("resources/templates/successpage.php");
+        } else {
+            include("resources/templates/errorpage.php");
         }
         include "footer.inc.php"
         ?>

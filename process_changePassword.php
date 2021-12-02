@@ -15,6 +15,13 @@
         $oldPassword = $_POST["oldPassword"];
         $newPassword = $_POST["newPassword"];
         $confirmNewPassword = $_POST["confirmNewPassword"];
+        //      check if any fields are empty
+        if (empty($oldPassword) || empty($newPassword) || empty($confirmNewPassword)) {
+            $h3 = "<h3>Oops!</h3>";
+            $h4 = "<h4>The following errors were detected:</h4>";
+            $errorMsg .= "All fields are required.<br>";
+            $success = false;
+        }
         // check if old password same as the hash password in db
         if (password_verify($oldPassword, $currentUserDetails["password"])) {
             // check and ensure that new password and confirm password same, if not throw error

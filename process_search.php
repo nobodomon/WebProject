@@ -49,9 +49,9 @@
                                 ?>
                                 <article class="card mt-3">
                                     <div class="card-body d-flex align-items-start">
-                                        <a href="profile.php?userID=<?=$userRows[0]?>"><img class="me-2 avatar-sm rounded-circle" src="<?='images/profilepics/'.$userRows[8]?>" alt="Generic placeholder image"></a>
+                                        <a href="profile.php?userID=<?= $userRows[0] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?= 'images/profilepics/' . $userRows[7] ?>" alt="Generic placeholder image"></a>
                                         <div class="flex-grow-1">
-                                            <a href="profile.php?userID=<?=$userRows[0]?>" class="button-nopadding six"><?php echo $userRows[1] ?></a>
+                                            <a href="profile.php?userID=<?= $userRows[0] ?>" class="button-nopadding six"><?php echo $userRows[1] ?></a>
                                             <p class="card-text">
                                                 <?php echo $userRows[2] . " " . $userRows[3] ?></p>
                                         </div>
@@ -104,14 +104,35 @@
                                     $author = getUserFromID($postRows[1]);
                                 }
                                 ?>
-                                <article class="card mt-3">
+                                <article class="card mt-3 <?php if ($postRows[5]==1){echo "border-warning";} ?>">
                                     <div class="card-body d-flex align-items-start">
-                                        <a href="profile.php?userID=<?= $postRows[1] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?= 'images/profilepics' . $author['profilePic'] ?>" alt="Generic placeholder image">
+                                        <a href="profile.php?userID=<?= $postRows[1] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?= 'images/profilepics/' . $author['profilePic'] ?>" alt="Generic placeholder image">
                                             <div class="flex-grow-1">
                                                 <a href="viewPost.php?postID=<?= $postRows[0] ?>" class="button-nopadding six"><?php echo $postRows[2] ?></a> <small class="text-muted"><?php echo time_elapsed_string($postRows[4]) ?></small>
-                                                <p class="card-text">
-                                                    <?php echo $postRows[3] ?></p>
+                                                <?php if (getPostTagCount($postRows[0]) > 0) { ?>
+                                                    <div class="mt-3">
+                                                        <p class="text-muted mb-2 font-13"><strong>Tags :</strong>
+                                                            <?php
+                                                            $tags = getInterestByPostID($postRows[0]);
+
+                                                            while ($tag = $tags->fetch_array(MYSQLI_NUM)) {
+                                                                ?>
+                                                                <a href="process_category.php?categoryID=<?php echo $tag[1] ?>" class="tags">
+                                                                    <span class="badge rounded-pill bg-dark"><?php echo $tag[3] ?></span>
+                                                                </a>
+                                                                <?php
+                                                            }
+                                                            ?></p>
+
+
+                                                    </div>     
+                                                <?php } else { ?>
+                                                    <div class="mt-3">
+                                                        <p class="text-muted mb-2 font-13"><strong>Tags :  No Tags</strong></p>
+                                                    </div>
+                                                <?php } ?>
                                             </div>
+
                                             <a href="viewPost.php?postID=<?php echo $postRows[0] ?>" class="button three">View Post</a>
                                     </div>
                                 </article>

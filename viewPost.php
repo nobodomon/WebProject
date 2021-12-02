@@ -44,6 +44,9 @@ $postID = $_GET["postID"];
                         }
                         if (($post["author_id"] == $sessionUserID) || ($postPrivacy == 0 ) || ($postPrivacy == 1 && $followed) || ($postPrivacy == 2 && $subscribed)) {
                             include("resources/templates/post.php");
+                        }else{
+                            $errorMsg = "The post was not found or you do not have the permissions to view this post";
+                            include("resources/templates/errorpage.php");
                         }
                     } else if ($postExist == false) {
                         ?>

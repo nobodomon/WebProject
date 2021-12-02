@@ -9,159 +9,121 @@
         ?>
         <?php
         $email = $errorMsg = $interest = "";
-        $interests = $_POST["interest"];
-        $username = sanitize_input($_POST["username"]);
-        $lname = sanitize_input($_POST["lname"]);
-        $fname = sanitize_input($_POST["fname"]);
+        
+        if (empty($_POST["interest"])) {
+            $interests = array();
+        } else {
+            $interests = $_POST["interest"];
+        }
         $success = true;
-        if (empty($_POST["email"]) || empty($_POST["username"])) 
-        {
-            $errorMsg .= "Email is required.<br>";
+        if (empty($_POST["email"]) || empty($_POST["username"]) || empty($_POST["fname"]) || empty($_POST['lname']) || empty($_POST["pwd"]) || empty($_POST["pwd_confirm"])) {
+            $errorMsg .= "All fields are required!";
             $success = false;
-        } 
-        else 
-        {
+        } else {
+            $username = sanitize_input($_POST["username"]);
             $email = sanitize_input($_POST["email"]);
+            $lname = sanitize_input($_POST["lname"]);
+            $fname = sanitize_input($_POST["fname"]);
+            if(strlen($username) > 45){
+                $success = false;
+                $errorMsg .="Username is too long! <br>";
+            }
+            if(strlen($email) > 45){
+                $success = false;
+                $errorMsg .= "email is too long! <br>";
+            }
+            if(strlen($fname) > 45){
+                $success = false;
+                $errorMsg .= "First name is too long! <br>";
+            }
+            if(strlen($lname) > 45){
+                $success = false;
+                $errorMsg .= "Last name is too long! <br>";
+            }
             // Additional check to make sure e-mail address is well  -formed.
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errorMsg = $errorMsg . "Invalid email format.<br>";
+                $errorMsg .= "Invalid email format!";
+                $success = false;
+            }
+            if ($_POST["pwd"] === $_POST["pwd_confirm"]) {
+                $pwd = password_hash($_POST["pwd"], PASSWORD_DEFAULT);
+            } else if ($_POST["pwd"] != $_POST["pwd_confirm"]) {
+                $errorMsg .= "Password do not match!";
                 $success = false;
             }
         }
-        //check for if pass or cpass is empty
-        if (empty($_POST["pwd"]))
-        { 
-            $errorMsg .= "Password is required <br>";
-            $success = false; 
-        }
-        // Check if password and confirm passwords are the same
-        else if ($_POST["pwd"] === $_POST["pwd_confirm"]) 
-        {
-            $pwd = password_hash($_POST["pwd"], PASSWORD_DEFAULT);
-        }
-        
-        else if ($_POST["pwd"] != $_POST["pwd_confirm"])
-        {
-            $errorMsg .= "Password do not match.<br>";
-            $success = false;
-        }
-        
-        if ($success) 
-        {
-            //adding values into global variable for saving
-            $fname = $fname;
-            $lname = $lname;
-            $email = $email;
-            $pwd = $pwd;
-            $errorMsg = $errorMsg;
-            $username = $username;
-            $success = $success;
-            $interest = $interest;
-            
-            // calling function to save into mysql
-            saveMemberToDB();
-            
-            $h3 = "<h3>Your Registration successful!</h3>";
-            $h4 = "<h4>Thank you for signing up, ". $lname . " " . $fname ."</h4>";
-            $btn = "<a href='login.php'><button class = 'btn btn-success'>Log-in </button></a><br>";
-            echo"$interest";
-        }
-            
-        else 
-        {
-            $h3 = "<h3>Oops!";
-            $h4 = "<h4>The following input errors were detected:</h4>";
-            $errors = "<p>" . $errorMsg . "</p>";
-            $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
-        }
 
         //Helper function that checks input for malicious or unwanted content. 
-        function sanitize_input($data) 
-        {
+        function sanitize_input($data) {
             $data = trim($data);
             $data = stripslashes($data);
             $data = htmlspecialchars($data);
             return $data;
         }
-        
-        function saveMemberToDB()
-        {
-            global $errorMsg, $success, $username, $fname, $lname, $email, $pwd, $interests;
-            
+
+        function saveMemberToDB() {
+            global $successMsg, $errorMsg, $success, $username, $fname, $lname, $email, $pwd, $interests;
+
             //Create database connection
             $config = parse_ini_file('../../private/db-config.ini');
             $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-            
+
             // Check connection
-            if($conn->connect_error)
-            {
-                $errorMsg = "Connection failed: " . $conn -> connect_error;
+            if ($conn->connect_error) {
+                $errorMsg .= "Connection failed: " . $conn->connect_error;
                 $success = false;
-                
-                $h3 = "<h3>Oops!";
-                $h4 = "<h4>The following input errors were detected:</h4>";
-                $errors = "<p>" . $errorMsg . "</p>";
-                $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
-            }
-            else
-            {
+            } else {
                 //Prepare the statement:
-                $stmt = $conn -> prepare("INSERT INTO users (username, fname, lname, email, password, interest) VALUES (?,?,?,?,?,?)");
-                
+                $stmt = $conn->prepare("INSERT INTO users (username, fname, lname, email, password) VALUES (?,?,?,?,?)");
+
                 //Bind & Execute the query statement:
                 $pwd_hashed = $pwd;
-                $stmt-> bind_param("ssssss", $username, $fname, $lname, $email, $pwd_hashed, $interest);
-                
-                if(!$stmt-> execute())
-                {
-                    $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+                $stmt->bind_param("sssss", $username, $fname, $lname, $email, $pwd_hashed);
+
+                if (!$stmt->execute()) {
+                    $errorMsg .= "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
                     $success = false;
-                    $h3 = "<h3>Oops!</h3>";
-                    $h4 = "<h4>The following input errors were detected:</h4>";
-                    $errors = "<p>" . $errorMsg . "</p>";
-                    $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
+                } else {
+                    $success = true;
+                    $stmt = $conn->prepare("SELECT userID FROM users WHERE email =?");
+                    $stmt->bind_param("s", $email);
+                    if (!$stmt->execute()) {
+                        $success = false;
+                        $errorMsg .= $stmt->error;
+                    } else {
+                        $user = $stmt->get_result()->fetch_row()[0];
+                        foreach ($interests as $interest) {
+                            $stmt = $conn->prepare("INSERT INTO interest(userID,categoryID) VALUES(?,?)");
+                            $stmt->bind_param("ii", $user, $interest);
+
+                            if (!$stmt->execute()) {
+                                $success = false;
+                                $errorMsg .= $stmt->error;
+                            } else {
+                                $success = true;
+                                $successMsg = "<h4>Thank you for signing up, " . $lname . " " . $fname . "</h4>";
+                            }
+                            $stmt->close();
+                        }
+                    }
                 }
-                else
-                {
-                    
-                    $h3 = "<h3>Your Registration successful!</h3>";
-                    $h4 = "<h4>Thank you for signing up, ". $lname . " " . $fname ."</h4>";
-                    $btn = "<a href='login.php'><button class = 'btn btn-success'>Log-in </button></a><br>";
-                }
-                $stmt->close();
-                
-                $stmt = $conn -> prepare("SELECT userID FROM users WHERE email =?");
-                $stmt->bind_param("s",$email);
-                $stmt->execute();
-                $user = $stmt->get_result()->fetch_row()[0];
-                
-                
-                foreach ($interests as $interest) {
-                    $stmt = $conn->prepare("INSERT INTO interest(userID,categoryID) VALUES(?,?)");
-                    $stmt->bind_param("ii", $user, $interest);
-                    $stmt->execute();
-                    $stmt->close();
-                }
-                
             }
             $conn->close();
             return $success;
         }
-        
-        
         ?>
         <main class="container">
-            <hr>
-                <?php
-                    echo $h3;
-                    echo $h4;
-                    if (empty($errors)){
-                    }else{
-                        echo $errors;
-                    }
-                    echo $btn;
-                ?>
-            <br>
+            <?php
+            if ($success) {
+                if (saveMemberToDB()) {
+                    include("resources/templates/successpage.php");
+                } else {
+                    include("resources/templates/errorpage.php");
+                }
+            } else {
+                include("resources/templates/errorpage.php");
+            }
+            ?>
         </main>
         <?php
         include "footer.inc.php"

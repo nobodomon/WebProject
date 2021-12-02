@@ -52,29 +52,27 @@
                             <?php
                         } else {
                             //Subscribe dialog
-                            $subBtn = "<button type='submit' class='button three'>Subscribe</button>";
                             ?>
                             <h3>Confirm Subscription?</h3>
-                            <p>Subscribing to <?= "@" . $viewingUser['username'] ?> will allow you to see exclusive subscriber only posts.</p>
+                            <p>Subscribing to <?= "@" . $viewingUser['username'] ?> will allow you to see exclusive subscriber only posts. Subscription Fee will be $10.</p>
                             <form method="post" action="process_subscribe.php?subscriberID=<?php echo $userID ?>">
-                                <div class="p-4">
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text bg-primary">Name on card</span>
+                                    <label for="cardName" class="mt-2 mb-2 button-looking-text">Name on card:</label>
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text bg-primary text-white"><i
+                                                class="bi bi-person-circle text-white"></i></span>
                                         <input class="form-control" required type="text" id="cardName" name="cardName" placeholder="Enter Name on card">
                                     </div>
-                                </div>
 
-                                <div class="p-4">
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text bg-primary">Credit Card Number</span>
+                                    <label for="ccNo" class="mt-2 mb-2 button-looking-text">Credit Card Number:</label>
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text bg-primary text-white"><i class="bi bi-credit-card-2-back-fill"></i></span>
                                         <input class="form-control" required type="number" inputmode="numeric" id="ccNo" pattern="[0-9]*" name="ccNo" placeholder="1111-2222-3333-4444">
                                     </div>
-                                </div>
 
-                                <div class="p-4">
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text bg-primary">Expiry Month</span>
-                                        <select class="form-control" required type="text" id="expiryMonth" min="1" max="12" name="expiryMonth" placeholder="Enter Name on card">
+                                    <label for="expiryMonth" class="mt-2 mb-2 button-looking-text">Expiry month:</label>
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text bg-primary text-white"><i class="bi bi-calendar2-month"></i></span>
+                                        <select class="form-control" required type="text" id="expiryMonth" min="1" max="12" name="expiryMonth" placeholder="Expiry month">
                                             <?php
                                             $months = array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
                                             $monthIndex = 1;
@@ -87,11 +85,10 @@
                                             ?>
                                         </select>
                                     </div>
-                                </div>
-                                <div class="p-4">
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text bg-primary">Expiry Year</span>
-                                        <select class="form-control" required id="expiryYear" name="expiryYear" placeholder="Enter Name on card">
+                                    <label for="expiryYear" class="mt-2 mb-2 button-looking-text">Expiry year:</label>
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text bg-primary text-white"><i class="bi bi-calendar2"></i></span>
+                                        <select class="form-control" required id="expiryYear" name="expiryYear" placeholder="Expiry year">
                                             <?php
                                             $min = date("Y");
                                             $max = date("Y") + 4;
@@ -104,17 +101,16 @@
                                             ?>
                                         </select>
                                     </div>
-                                </div>
 
-                                <div class="p-4">
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text bg-primary">CCV</span>
-                                        <input class="form-control" required type="number" id="ccv" name="ccv" pattern="[0-9]*" placeholder="Enter ccv on card">
+                                    <label for="ccv" class="mt-2 mb-2 button-looking-text">CCV:</label>
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text bg-primary text-white"><i class="bi bi-credit-card-2-back"></i></span>
+                                        <input class="form-control" required type="number" id="ccv" name="ccv" pattern="[0-9]*" placeholder="CCV on card">
                                     </div>
-                                </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <?= $subBtn ?>
+                                    <button type="submit" class="btn btn-primary">Subscribe</button>
+                                </div>
                                 </div>
                             </form>
                             <?php
@@ -145,7 +141,7 @@
                             while ($follower = $followers->fetch_array(MYSQLI_NUM)) {
                                 ?>
                                 <div class="d-flex align-items-start mb-3">
-                                    <a href="profile.php?userID=<?= $follower[0] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/profilepics/' . $follower[8] ?>" alt="Generic placeholder image"></a>
+                                    <a href="profile.php?userID=<?= $follower[0] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/profilepics/' . $follower[7] ?>" alt="Generic placeholder image"></a>
                                     <div class="w-100 align-self-center">
                                         <a href="profile.php?userID=<?php echo $follower[0] ?>" class="button-nopadding six"><?php echo $follower[1] ?></a>
                                     </div>
@@ -183,7 +179,7 @@
                             while ($followingUser = $following->fetch_array(MYSQLI_NUM)) {
                                 ?>
                                 <div class="d-flex align-items-start mb-3">
-                                    <a href="profile.php?userID=<?= $followingUser[0] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/profilepics/' . $followingUser[8] ?>" alt="Generic placeholder image"></a>
+                                    <a href="profile.php?userID=<?= $followingUser[0] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/profilepics/' . $followingUser[7] ?>" alt="Generic placeholder image"></a>
                                     <div class="w-100 align-self-center">
                                         <a href="profile.php?userID=<?php echo $followingUser[0] ?>" class="button-nopadding six"><?php echo $followingUser[1] ?></a>
                                     </div>
@@ -221,7 +217,7 @@
                             while ($subscriber = $subscribers->fetch_array(MYSQLI_NUM)) {
                                 ?>
                                 <div class="d-flex align-items-start mb-3">
-                                    <a href="profile.php?userID=<?= $subscriber[0] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/profilepics/' . $subscriber[8] ?>" alt="Generic placeholder image"></a>
+                                    <a href="profile.php?userID=<?= $subscriber[0] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/profilepics/' . $subscriber[7] ?>" alt="Generic placeholder image"></a>
                                     <div class="w-100 align-self-center">
                                         <a href="profile.php?userID=<?php echo $subscriber[0] ?>" class="button-nopadding six"><?php echo $subscriber[1] ?></a>
                                     </div>
@@ -252,6 +248,7 @@
                                     <div class="dropdown-menu dropdown-menu-end">
                                         <!-- item-->
                                         <a href="editProfile.php" class="dropdown-item">Edit Profile</a>
+                                        <a href="editprofilepicture.php" class="dropdown-item">Change Profile Picture</a>
                                         <a href="changePassword.php" class="dropdown-item">Change Password</a>
                                         <!-- item-->
                                         <a href="logout.php" class="dropdown-item">Logout</a>
@@ -321,8 +318,13 @@
                                         $interests = getCategoriesOfUser($userID);
 
                                         while ($interest = $interests->fetch_array(MYSQLI_NUM)) {
+                                            $categoryID = $interest[2];
                                             ?>
-                                            <span class="badge rounded-pill bg-dark"><?php echo $interest[3] ?></span>
+
+                                            <a href="process_category.php?categoryID=<?php echo $categoryID ?>" class="tags">
+                                                <span class="badge rounded-pill bg-dark"><?php echo $interest[3] ?></span>
+                                            </a>
+
                                             <?php
                                         }
                                         ?>
@@ -333,15 +335,7 @@
                                     </div>
                                 <?php } ?>     
 
-                            </div>
-                            <ul class="social-list list-inline mt-3 mb-0">
-                                <li class="list-inline-item">
-                                    <a href="javascript: void(0);" class="social-list-item text-center border-primary text-primary" aria-label="Facebook"><i class="mdi mdi-facebook"></i></a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a href="javascript: void(0);" class="social-list-item text-center border-info text-info" aria-label="Twitter"><i class="mdi mdi-twitter"></i></a>
-                                </li>
-                            </ul>   
+                            </div>  
                         </div>                                 
                     </aside> <!-- end card -->
 
@@ -363,6 +357,28 @@
                                 </div>
                             </div>
                         </div>
+                    </section><section class="card">
+                        <div class="card-body text-center">
+                            <div class="row">
+                                <div class="col-12 border-end border-light">
+                                    <h6 class="text-muted mt-1 mb-2 fw-normal">Total Posts</h5>
+                                    <span class="button-looking-text-big"><?php echo getPostCountsByUser($userID,3) ?></span>
+                                </div>
+                                <hr class="my-2">
+                                <div class="col-4 border-end border-light">
+                                    <h6 class="text-muted mt-1 mb-2 fw-normal">Public posts</h5>
+                                    <span class="button-looking-text-big"><?php echo getPostCountsByUser($userID,0) ?></span>
+                                </div>
+                                <div class="col-4 border-end border-light">
+                                    <h6 class="text-muted mt-1 mb-2 fw-normal">Follower posts</h5>
+                                        <span class="button-looking-text-big"><?php echo getPostCountsByUser($userID,1) ?></span>
+                                </div>
+                                <div class="col-4 border-end border-light">
+                                    <h6 class="text-muted mt-1 mb-2 fw-normal">Exclusive posts</h5>
+                                        <span class="button-looking-text-big"><?php echo getPostCountsByUser($userID,2) ?></span>
+                                </div>
+                            </div>
+                        </div>
                     </section>
                 </div> <!-- end col-->
 
@@ -372,43 +388,7 @@
                             <!-- comment box -->
                             <?php
                             if ($userID == $sessionUserID) {
-                                ?> 
-                                <form action="submitPost.php" method="post" class="comment-area-box mb-3">
-
-
-                                    <div class="form-group">
-                                        <label for="title">Title:</label>
-                                        <input class="form-control" type="text" id="title" name="title" required placeholder="Enter title"> 
-                                    </div>
-                                    <span class="input-icon">
-                                        <label for="content">Content:</label>
-                                        <textarea rows="3" class="form-control" id="content" name="content" placeholder="Write something..."></textarea>
-                                    </span>
-                                    <div class="p-4">
-                                        <label for="interestType">Interest Tags: </label>
-                                        <div class="input-group  d-flex">
-                                            <?php while ($row = $categoriesResults->fetch_array(MYSQLI_NUM)) { ?> 
-                                                <input type="checkbox" class="btn-check" name="interest[]" id="btn-check<?php echo $row[0] ?>" autocomplete="off" value="<?php echo $row[0] ?>"/>
-                                                <label class="btn btn-outline-dark" for="btn-check<?php echo $row[0] ?>"><?php echo $row[1]; ?></label>
-                                            <?php } ?>
-                                        </div>
-                                    </div>
-
-                                    <div class="comment-area-btn">
-                                        <label for="postType">Post Privacy: </label>
-                                        <div class="input-group  d-flex">
-                                            <select id="postType" name="postType" class="form-select form-select-sm" aria-label=".form-select-lg postPrivacy">
-                                                <option selected value="0">Public</option>
-                                                <option value="1">Followers Only</option>
-                                                <option value="2">Subscribers only</option>
-                                            </select>
-                                            <div class="float-end">
-                                                <button type="submit" class="btn btn-outline-primary waves-effect waves-light">Post</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
-                                <?php
+                                include("resources/templates/createpostwidget.php");
                             }
                             ?>
 

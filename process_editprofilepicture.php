@@ -1,4 +1,6 @@
 
+<!doctype html>
+<html lang="en">
 <?php
 // get current user details
 session_start();
@@ -31,19 +33,19 @@ $conn = new mysqli($config['servername'], $config['username'], $config['password
           if (!$stmt->error) {
             $msg = "Upload success";
             $css_class = "alert-success";
-            header("Location: editProfile.php");
+            header("Location: profile.php?userID=". $userID);
           } 
           else {
             $_SESSION['error'] = $stmt->error;
               $msg = "Failed to upload";
               $css_class = "alert-danger";
-              header("Location: editprofilepicture.php");
+              header("Location: profile.php?userID=". $userID);
           }
         }
         else{
             $msg = "Failed to upload file to Apache";
             $css_class = "alert-danger";
-            header("Location: editprofilepicture.php");
+            header("Location: profile.php?userID=". $userID);
             
         }
     }

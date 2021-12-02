@@ -21,20 +21,26 @@
                                 <div class="input-group mb-3">
                                     <span class="input-group-text bg-primary text-white"><i
                                             class="bi bi-key text-white"></i></span>
-                                            <br>
+                                    <br>
                                     <input type="password" id="oldPassword" name="oldPassword" required placeholder="Old password" class="form-control" >
+                                    <span class="input-group-text bg-primary text-white"><i class="bi bi-eye-slash" id="oldTogglePassword"></i></span>
                                 </div>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text bg-primary text-white"><i
                                             class="bi bi-key text-white"></i></span>
-                                            <br>
+                                    <br>
                                     <input type="password" id="newPassword" name="newPassword" required placeholder="New password" class="form-control" >
+                                    <span class="input-group-text bg-primary text-white">
+                                        <i class="bi bi-eye-slash" id="newTogglePassword"></i></span>
+
                                 </div>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text bg-primary text-white"><i
                                             class="bi bi-key text-white"></i></span>
-                                            <br>
+                                    <br>
                                     <input type="password" id="confirmNewPassword" name="confirmNewPassword" required placeholder="Confirm new password" class="form-control" >
+                                    <span class="input-group-text bg-primary text-white"><i class="bi bi-eye-slash" id="confirmNewTogglePassword"></i></span>
+
                                 </div>
 
                                 <br>

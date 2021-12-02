@@ -10,38 +10,25 @@
         <?php
         $title = $errorMsg = "";
         $success = true;
-        if(empty($_POST["interest"])){
+        if (empty($_POST["interest"])) {
             $interests = array();
-        }else{
+        } else {
             $interests = $_POST["interest"];
         }
         if (empty($_POST["title"]) || empty($_POST["content"])) {
             $errorMsg .= "Title and content is required.<br>";
             $success = false;
         } else {
-            $title = $_POST['title'];
-            $content = $_POST['content'];
-            $postType = $_POST['postType'];
             $postID = $_GET['pid'];
-            validatePostType();
-        }
-        if ($success) {
-            //$h3 = "<h3>Your Registration successful!</h3>";
-            //$h4 = "<h4>Thank you for signing up, ". $_POST["lname"]. " " . $_POST["fname"] ."</h4>";
-            //$btn = "<a href='#'><button class = 'btn btn-success'>Log-in </button></a><br>";
-            if (editPost()) {
-                
+            $title = $_POST['title'];
+            if (strlen($title) > 255) {
+                $success = false;
+                $errorMsg .= "Title is too long!";
             } else {
-                $h3 = "<h3>Oops!";
-                $h4 = "<h4>The following input errors were detected:</h4>";
-                $errors = "<p>" . $errorMsg . "</p>";
-                $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
+                $content = $_POST['content'];
+                $postType = $_POST['postType'];
+                validatePostType();
             }
-        } else {
-            $h3 = "<h3>Oops!";
-            $h4 = "<h4>The following input errors were detected:</h4>";
-            $errors = "<p>" . $errorMsg . "</p>";
-            $btn = "<a href='register.php'><button class='btn btn-danger'>Return to Sign Up </button></a><br>";
         }
 
         function validatePostType() {
@@ -56,7 +43,7 @@
         }
 
         function editPost() {
-            global $success, $errorMsg, $title, $content, $postType, $postID, $interests;
+            global $success, $errorMsg,$successMsg, $title, $content, $postType, $postID, $interests;
             $sanitizedContent = htmLawed($content);
             $config = parse_ini_file('../../private/db-config.ini');
             $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
@@ -77,14 +64,26 @@
                     $success = true;
                     $stmt1 = $conn->prepare("DELETE FROM categoryForPost WHERE postID = ?");
                     $stmt1->bind_param("i", $postID);
-                    $stmt1->execute();
-                    $stmt1->close();
-                    foreach ($interests as $interest) {
-                        $stmt2 = $conn->prepare("INSERT INTO categoryForPost(postID, categoryID) VALUES(?,?)");
-                        $stmt2->bind_param("ii", $postID, $interest);
-                        $stmt2->execute();
-                        $stmt2->close();
+                    if (!$stmt1->execute()) {
+                        $success = false;
+                        $errorMsg .= $stmt1->error;
+                    } else {
+
+                        foreach ($interests as $interest) {
+                            $stmt2 = $conn->prepare("INSERT INTO categoryForPost(postID, categoryID) VALUES(?,?)");
+                            $stmt2->bind_param("ii", $postID, $interest);
+                            if (!$stmt2->execute()) {
+                                $success = false;
+                                $errorMsg .= $stmt2->error;
+                            } else {
+                                
+                                $success = true;
+                                $successMsg = "Post successfully edited!";
+                            }
+                            $stmt2->close();
+                        }
                     }
+                    $stmt1->close();
                 }
                 $stmt->close();
             }
@@ -93,27 +92,17 @@
         }
         ?>
         <main class="container">
-            <div class="page-wrap d-flex flex-row align-items-center">
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-md-12 text-center">
-                            <?php if ($success) { ?>
-
-                                <span class="display-1 d-block">Yay!</span>
-                                <div class="mb-4 lead">Your post was edited successfully!</div>
-                                <a href="index.php" class="btn btn-link">Back to Home</a>
-                            <?php } else { ?>
-
-                                <span class="display-1 d-block">Oops!</span>
-                                <div class="mb-4 lead">The following errors are detected: </div>
-                                <p><?php echo $errorMsg ?></p>
-                                <a href="index.php" class="btn btn-link">Back to Home</a>
-
-                            <?php } ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <?php
+            if ($success) {
+                if (editPost()) {
+                    include("resources/templates/successpage.php");
+                } else {
+                    include("resources/templates/errorpage.php");
+                }
+            } else {
+                include("resources/templates/errorpage.php");
+            }
+            ?>
         </main>
         <?php
         include "footer.inc.php"

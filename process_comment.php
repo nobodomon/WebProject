@@ -28,5 +28,3 @@ processNotifications($authorID, $content, 1, $commentingUserID, $postID);
 header("Location:" . $_SERVER["HTTP_REFERER"]);
 ?>
 
-<p><?=$errorMsg?></p>
-

@@ -5,28 +5,16 @@
     ?>
     <body>
         <?php
-        include "nav.inc.php"
+        include "nav.inc.php";
+        $categoriesResults = getAllCategories();
         ?>
         <main class="container">
-            <form action="submitPost.php" method="post">
-                <div class="form-group">
-                    <label for="title">Title:</label>
-                    <input class="form-control" type="text" id="title" name="title" required placeholder="Enter title"> 
+            <div class="card">
+                <div class="card-body">
+
+                    <?php include("resources/templates/createpostwidget.php") ?>
                 </div>
-                <div class="form-group">
-                    <label for="content">Content:</label>
-                    <textarea id="content" name="content" placeholder="Enter your content here"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="postType">Post Privacy: </label>
-                    <select id="postType" name="postType" class="form-select form-select-lg mb-3" aria-label=".form-select-lg postPrivacy">
-                        <option selected value="0">Public</option>
-                        <option value="1">Followers Only</option>
-                        <option value="2">Subscribers only</option>
-                    </select>
-                    <button class="btn btn-primary" type="submit">Submit</button> 
-                </div>
-            </form>
+            </div>
         </main>
         <?php
         include "footer.inc.php"

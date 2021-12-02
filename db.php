@@ -80,6 +80,24 @@ function getPostByUser($userID) {
     }
 }
 
+function getPostCountsByUser($userID, $privacyType) {
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    if ($privacyType == 3) {
+
+        $stmt = $conn->prepare("SELECT count(*) FROM post WHERE author_id = ?");
+        $stmt->bind_param("i", $userID);
+    } else {
+        $stmt = $conn->prepare("SELECT count(*) FROM post WHERE author_id = ? AND postType = ?");
+        $stmt->bind_param("ii", $userID, $privacyType);
+    }
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_row()[0];
+    $stmt->close();
+    $conn->close();
+    return $rows;
+}
+
 function getFollowingArray($userID) {
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
@@ -96,16 +114,51 @@ function getFollowingArray($userID) {
     return $following;
 }
 
+
+function getSubscribingArray($userID) {
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $stmt = $conn->prepare("SELECT * FROM subscribers WHERE subscriberID = ? AND endDate>NOW()");
+    $stmt->bind_param("i", $userID);
+    $subscribing = array($userID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($rows = $result->fetch_array(MYSQLI_NUM)) {
+        array_push($subscribing, $rows[0]);
+    }
+    $stmt->close();
+    $conn->close();
+    return $subscribing;
+}
+
+function getInterestArray($userID) {
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $stmt = $conn->prepare("SELECT * FROM interest WHERE userID = ?");
+    $stmt->bind_param("i", $userID);
+    $interests = array();
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($rows = $result->fetch_array(MYSQLI_NUM)) {
+        array_push($interests, $rows[1]);
+    }
+    $stmt->close();
+    $conn->close();
+    return $interests;
+}
+
 function getHomePagePosts($userID) {
     global $list, $array, $errorMsg;
     $types = "";
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-    $array = getFollowingArray($userID);
-    $followingstr = str_repeat('?,', count($array) - 1) . '?';
-    $stmt = $conn->prepare("SELECT * FROM post WHERE author_id IN ($followingstr) ORDER BY postedDateTime DESC");
-    $types = $types ?: str_repeat('i', count($array));
-    $stmt->bind_param($types, ...$array);
+    $followingArray = getFollowingArray($userID);
+    $subscribingArray = getSubscribingArray($userID);
+    $followingstr = str_repeat('?,', count($followingArray) - 1) . '?';
+    $subscribingstr = str_repeat('?,', count($subscribingArray) - 1) . '?';
+    $stmt = $conn->prepare("SELECT * FROM post WHERE author_id IN ($followingstr) OR author_id IN ($subscribingstr)  ORDER BY postedDateTime DESC");
+    $types = $types ?: str_repeat('i', count($followingArray) + count($subscribingArray));
+    $stmt->bind_param($types, ...$followingArray,...$subscribingArray);
     $list = $followingstr;
     if (!$stmt->execute()) {
         $errorMsg = $stmt->error;
@@ -115,6 +168,28 @@ function getHomePagePosts($userID) {
         $conn->close();
     }
     return $posts;
+}
+
+function getHomePagePostCount($userID) {
+    global $list, $array, $errorMsg;
+    $types = "";
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $array = getFollowingArray($userID);
+    $followingstr = str_repeat('?,', count($array) - 1) . '?';
+    $stmt = $conn->prepare("SELECT count(*) FROM post WHERE author_id IN ($followingstr) ORDER BY postedDateTime DESC");
+    $types = $types ?: str_repeat('i', count($array));
+    $stmt->bind_param($types, ...$array);
+    $list = $followingstr;
+    if (!$stmt->execute()) {
+        $errorMsg = $stmt->error;
+    } else {
+        $result = $stmt->get_result();
+        $rows = $result->fetch_row()[0];
+        $stmt->close();
+        $conn->close();
+    }
+    return $rows;
 }
 
 function getUserFromID($id) {
@@ -162,7 +237,7 @@ function getUserFromUsername($id) {
         $stmt = $conn->prepare("SELECT * FROM users WHERE username =?");
         //Bind & Execute the query statement:
         $stmt->bind_param("i", $id);
-        
+
         if (!$stmt->execute()) {
             $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
             $success = false;
@@ -226,12 +301,21 @@ function searchPostCount($query) {
 
 function getPostsRelatedToQuery($query) {
     global $postSearchSuccess, $postSearchErrorMsg;
+    if (isset($_SESSION["userID"])) {
+        if (empty($_SESSION["userID"])) {
+            $userID = -1;
+        } else {
+            $userID = $_SESSION["userID"];
+        }
+    } else {
+        $userID = -1;
+    }
     if ($query == "") {
         $postSearchErrorMsg = "Search is empty";
         $postSearchSuccess = false;
     } else {
         $splited_query = explode(' ', $query);
-        $sql_prep = "SELECT * FROM post WHERE title LIKE ? OR content LIKE ?";
+        $sql_prep = "SELECT * FROM post WHERE (title LIKE ? OR content LIKE ?";
         $splited_query[0] = "%$splited_query[0]%";
         $param = array_fill(0, 2, $splited_query[0]);
         $types = "ss";
@@ -243,6 +327,7 @@ function getPostsRelatedToQuery($query) {
                 array_push($param, $splited_query[$i]);
             }
         }
+        $sql_prep = $sql_prep . ") and (postType=0 or author_id = " . $userID . " or author_id in (select userID from subscribers where subscriberID=" . $userID . " and endDate>now()) or author_id in(select userID from followers where followerID = " . $userID . "))";
 
         //Create database connection
         $config = parse_ini_file('../../private/db-config.ini');
@@ -380,7 +465,7 @@ function getPostCountOfUser($userID) {
     return $rows;
 }
 
-function getCommentsForPost($postID, $limit = 3) {
+function getCommentsForPost($postID, $limit = -1) {
 
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
@@ -472,10 +557,11 @@ function checkIfPostExist($postID) {
         return true;
     }
 }
-function getSubscribers($userID){
+
+function getSubscribers($userID) {
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-    $sql = 'SELECT * FROM users INNER JOIN subscribers ON users.userID = subscribers.userID WHERE subscribers.subscriberID = ?';
+    $sql = 'SELECT * FROM users INNER JOIN subscribers ON users.userID = subscribers.subscriberID WHERE subscribers.userID = ? AND  endDate > NOW()';
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $userID);
     $stmt->execute();
@@ -485,7 +571,7 @@ function getSubscribers($userID){
     return $result;
 }
 
-function getFollowers($userID){
+function getFollowers($userID) {
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
     $sql = 'SELECT * FROM users INNER JOIN followers ON users.userID = followers.followerID WHERE followers.userID = ?';
@@ -497,7 +583,8 @@ function getFollowers($userID){
     $conn->close();
     return $result;
 }
-function getFollowing($userID){
+
+function getFollowing($userID) {
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
     $sql = 'SELECT * FROM users INNER JOIN followers ON users.userID = followers.userID WHERE followers.followerID = ?';
@@ -509,7 +596,6 @@ function getFollowing($userID){
     $conn->close();
     return $result;
 }
-
 
 function getFollowerCount($userID) {
     $config = parse_ini_file('../../private/db-config.ini');
@@ -805,7 +891,7 @@ function getUserInterestCategories($userID) {
 function getUserSubscribedList($userID) {
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-    $stmt = $conn->prepare("SELECT * FROM subscribers WHERE scriberID = ?");
+    $stmt = $conn->prepare("SELECT * FROM subscribers WHERE subscriberID = ?");
     $stmt->bind_param("i", $userID);
     $following = array($userID);
     $stmt->execute();
@@ -825,7 +911,7 @@ function checkIfSubscribed($userID, $currUserID) {
 
         $config = parse_ini_file('../../private/db-config.ini');
         $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
-        $stmt = $conn->prepare("SELECT count(*) AS count FROM subscribers WHERE userID = ? AND subscriberID = ? AND endDate > NOW()");
+        $stmt = $conn->prepare("SELECT count(*) FROM subscribers WHERE userID = ? AND subscriberID = ? AND endDate > NOW()");
         $stmt->bind_param("ii", $userID, $currUserID);
         $stmt->execute();
         $rows = $stmt->get_result()->fetch_row()[0];
@@ -956,5 +1042,58 @@ function getInterestCount($userID) {
     return $rows;
 }
 
+function getPostCountBasedOnCategoryID($categoryID) {
+
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $sql = 'select count(*) from categoryForPost INNER JOIN post ON categoryForPost.postID = post.post_id WHERE categoryForPost.categoryID = ?';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $categoryID);
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_row()[0];
+    $stmt->close();
+    $conn->close();
+    return $rows;
+}
+
+function getCategoryNameBasedOnCategoryID($categoryID) {
+
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $sql = 'SELECT categoryName FROM categories WHERE categoryID = ?';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $categoryID);
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_row()[0];
+    $stmt->close();
+    $conn->close();
+    return $rows;
+}
+
+function getPostBasedOnCategoryID($categoryID) {
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+    } else {
+        //Prepare the statement:
+        $stmt = $conn->prepare("SELECT * FROM categoryForPost INNER JOIN post ON categoryForPost.postID = post.post_id WHERE categoryForPost.categoryID = ? ORDER BY post.postedDateTime DESC");
+        //Bind & Execute the query statement:
+        $stmt->bind_param("i", $categoryID);
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        } else {
+            $result = $stmt->get_result();
+        }
+        $stmt->close();
+    }
+    $conn->close();
+    return $result;
+}
 
 ?>

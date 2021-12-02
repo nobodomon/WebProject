@@ -1,8 +1,8 @@
 <?php
 /*
   Requires
- *$sessionUserID -> $_SESSION["userID];
- *$sessionUser -> getUserFromID($sessionUserID);
+ * $sessionUserID -> $_SESSION["userID];
+ * $sessionUser -> getUserFromID($sessionUserID);
   $postID = $row[0];
   $author_id = $row[1];
   $title = $row[2];
@@ -16,28 +16,56 @@
 ?>
 
 <div class="border border-light p-2 mb-3">
-    <?php
-    if (($author_id == $sessionUserID)) {
-        ?>
-
-        <div class="dropdown float-end">
-            <a href="#" class="nav-link dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Post Options">
-                <i class="mdi mdi-dots-vertical"></i>
+    <article class="align-items-start">
+        <div class="d-flex align-items-center">
+            <a href="profile.php?userID=<?= $author_id ?>">
+                <img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/profilepics/' . $postAuthor['profilePic'] ?>" alt="<?= $postAuthor["username"] . " profile picture" ?>">
             </a>
-            <div class="dropdown-menu dropdown-menu-end">
-                <!-- item-->
-                <a href="process_delete.php?postID=<?php echo $postID ?>" class="dropdown-item">Delete Post</a>
-                <!-- item-->
-                <a href="editPost.php?postID=<?php echo $postID ?>" class="dropdown-item">Edit Post</a>
+            <div class="d-flex flex-column">
+                <span>
+                    <a href="viewPost.php?postID=<?php echo $postID ?>" class="button-nopadding six" aria-label="<?= "Read more about " . $title ?>">
+                        <?php echo $title ?>   
+                    </a>
+                </span>
+
+                <span><small>Posted By: 
+                        <a href="profile.php?userID=<?php echo $author_id ?>"  class="button-nopadding six">@<?php echo $postAuthor["username"] ?>
+                        </a>
+                        <?php
+                        if ($edited == 0) {
+                            ?>
+                        <?php } else if ($edited == 1) { ?>
+                            edited <?php echo time_elapsed_string($editedDateTime) ?>
+                            <?php
+                        } else {
+                            
+                        }
+                        ?>
+                    </small></span>
             </div>
+            <p class="text-muted postTimeStamp flex-grow-1"><small>
+                    <?php echo time_elapsed_string($postedDateTime) ?></small>
+            </p>
+            <?php
+            if (($author_id == $sessionUserID)) {
+                ?>
+
+                <div class="dropdown float-end">
+                    <a href="#" class="nav-link dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Post Options">
+                        <i class="mdi mdi-dots-vertical"></i>
+                    </a>
+                    <div class="dropdown-menu post-options">
+                        <!-- item-->
+                        <a href="process_delete.php?postID=<?php echo $postID ?>" class="dropdown-item">Delete Post</a>
+                        <!-- item-->
+                        <a href="editPost.php?postID=<?php echo $postID ?>" class="dropdown-item">Edit Post</a>
+                    </div>
+                </div>
+            <?php }
+            ?>
         </div>
-    <?php }
-    ?>
-    <article class="d-flex align-items-start">
-        <a href="profile.php?userID=<?= $author_id ?>"><img class="me-2 avatar-sm rounded-circle" src="<?php echo 'images/profilepics/' . $postAuthor['profilePic'] ?>" alt="Generic placeholder image"></a>
+        <hr>
         <div class="w-100">
-            <a href="viewPost.php?postID=<?php echo $postID ?>" class="button-nopadding six"><?php echo $title ?>   </a> <small class="text-muted"><?php echo time_elapsed_string($postedDateTime) ?></small>
-            <hr>
             <section class="card-text">
                 <?php echo $content ?></section>
 
@@ -49,31 +77,20 @@
 
                         while ($tag = $tags->fetch_array(MYSQLI_NUM)) {
                             ?>
-                            <span class="badge rounded-pill bg-dark"><?php echo $tag[3] ?></span>
+                            <a href="process_category.php?categoryID=<?php echo $tag[1] ?>" class="tags">
+                                <span class="badge rounded-pill bg-dark"><?php echo $tag[3] ?></span>
+                            </a>
                             <?php
                         }
                         ?></p>
+
+
                 </div>     
             <?php } else { ?>
                 <div class="mt-3">
                     <p class="text-muted mb-2 font-13"><strong>Tags :  No Tags</strong></p>
                 </div>
             <?php } ?>
-
-            <p class="text-right"><small>Posted By: 
-                    <a href="profile.php?userID=<?php echo $author_id ?>"  class="button-nopadding six">@<?php echo $postAuthor["username"] ?>
-                    </a>
-                    <?php
-                    if ($edited == 0) {
-                        ?>
-                    <?php } else if ($edited == 1) { ?>
-                        edited <?php echo time_elapsed_string($editedDateTime) ?>
-                        <?php
-                    } else {
-                        
-                    }
-                    ?>
-                </small></p>
             <div class="d-flex">
                 <?php
                 if ($sessionUserID == -1) {
@@ -95,7 +112,7 @@
                     echo "&nbsp;(" . $likes . ' ' . $likeOrLikes . ")";
                     ?> 
                 </a>
-                <a class="button four d-inline-block mt-2 commentToggle nav-link d-flex align-items-center" aria-label="Show/Hide Comments">
+                <a class="button four d-inline-block mt-2 commentToggle nav-link d-flex align-items-center" role="button" aria-pressed="false">
                     <span class='material-icons'>chat_bubble_outline</span>
                     <span>
                         <?php
@@ -110,22 +127,14 @@
 
     <?php
     $comments = getCommentsForPost($postID);
-    if ($comments == "No post") {
-        
+    if ($commentCount == 0) {
+        ?>
+        <div></div>
+        <?php
     } else {
         ?>
         <div class="post-user-comment-box">
             <?php
-            if ($commentCount > 3) {
-                ?>
-                <div class='d-flex justify-content-between'>
-                    <a href="viewPost.php?postID=<?php echo $postID ?>" class='text-center' >View More comments</a>
-                    <br>
-                    <hr/>
-                </div>
-                <?php
-            }
-
             $currCommentingUserID = -1;
             $currCommentingUser;
             while ($commentRows = $comments->fetch_array(MYSQLI_NUM)) {
@@ -161,25 +170,29 @@
                 </div>
                 <?php
             }
-            if ($sessionUserID == -1) {
-                $commentProcess = "login.php";
-                $placeHolderPic = "images/profilepics/default.jpg";
-            } else {
-                $commentProcess = "process_comment.php?postID=" . $postID . "&userID=" . $author_id;
-                $placeHolderPic = 'images/profilepics/' . $sessionUser['profilePic'];
-            }
             ?>
-            <div class="d-flex align-items-start mt-2">
-                <a class="pe-2" href="profile.php?userID=<?php echo $sessionUserID ?>">
-                    <img src="<?php echo $placeHolderPic ?>" class="rounded-circle" alt="Generic placeholder image" height="31" width="31">
-                </a>
-                <form class="d-flex" method="post" action="<?php echo $commentProcess ?>">
-                    <input type="text" id="comment" name="comment" class="form-control border-0 form-control-sm me-2" required placeholder="Add comment">
-                    <button type="submit" name="_submit" class="btn btnoutline-primary" value='Submit'>Submit</button>
-                </form>
-            </div>
         </div>
         <?php
     }
+    if ($sessionUserID == -1) {
+        $commentProcess = "login.php";
+        $placeHolderPic = "images/profilepics/default.jpg";
+    } else {
+        $commentProcess = "process_comment.php?postID=" . $postID . "&userID=" . $author_id;
+        $placeHolderPic = 'images/profilepics/' . $sessionUser['profilePic'];
+    }
     ?>
+
+    <hr>
+    <div>
+        <div class="d-flex align-items-center mt-2">
+            <a class="pe-2" href="profile.php?userID=<?php echo $sessionUserID ?>">
+                <img src="<?php echo $placeHolderPic ?>" class="rounded-circle" alt="Generic placeholder image" height="31" width="31">
+            </a>
+            <form class="d-flex flex-grow-1" method="post" action="<?php echo $commentProcess ?>">
+                <input type="text" id="comment-<?= $postID ?>" name="comment" class="form-control border-0 form-control-sm me-2 flex-grow-1" required placeholder="Add comment">
+                <button type="submit" name="_submit" class="btn btn-primary" value='Submit'>Submit</button>
+            </form>
+        </div>
+    </div>
 </div>
