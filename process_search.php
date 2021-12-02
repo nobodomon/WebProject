@@ -21,7 +21,7 @@
                         <li class="breadcrumb-item active" aria-current="page">Search Results</li>
                     </ol>
                 </nav>
-                <h2 class="text-center flex-grow-1"> Your search for: <?php echo $query ?></h2>
+                <span class="text-center flex-grow-1 button-looking-text-big"> Your search for: <?php echo $query ?></span>
             </section>
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item" role="presentation">
@@ -48,14 +48,42 @@
                             while ($userRows = $userResults->fetch_array(MYSQLI_NUM)) {
                                 ?>
                                 <article class="card mt-3">
-                                    <div class="card-body d-flex align-items-start">
-                                        <a href="profile.php?userID=<?= $userRows[0] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?= 'images/profilepics/' . $userRows[7] ?>" alt="Generic placeholder image"></a>
-                                        <div class="flex-grow-1">
-                                            <a href="profile.php?userID=<?= $userRows[0] ?>" class="button-nopadding six"><?php echo $userRows[1] ?></a>
-                                            <p class="card-text">
-                                                <?php echo $userRows[2] . " " . $userRows[3] ?></p>
+                                    <div class="card-body d-flex align-items-center">
+                                        <a href="profile.php?userID=<?= $userRows[0] ?>"><img class="me-2 avatar-md rounded-circle" src="<?= 'images/profilepics/' . $userRows[7] ?>" alt="Generic placeholder image"></a>
+                                        <div class="d-flex flex-grow-1 mr-3">
+                                            <div class="flex-column">
+                                                <a href="profile.php?userID=<?= $userRows[0] ?>" class="button-nopadding six">@<?php echo $userRows[1] ?></a>
+                                                <p class="card-text">
+                                                    <?php echo $userRows[2] . " " . $userRows[3] ?></p>
+                                                <div class="mt-3">
+
+                                                    <?php if (getInterestCount($userRows[0]) > 0) { ?>
+                                                        <p class="text-muted mb-2 font-13"><strong>Interests :</strong> 
+                                                            <?php
+                                                            $interests = getCategoriesOfUser($userRows[0]);
+
+                                                            while ($interest = $interests->fetch_array(MYSQLI_NUM)) {
+                                                                $categoryID = $interest[2];
+                                                                ?>
+
+                                                                <a href="process_category.php?categoryID=<?php echo $categoryID ?>" class="tags">
+                                                                    <span class="badge rounded-pill bg-dark"><?php echo $interest[3] ?></span>
+                                                                </a>
+
+                                                                <?php
+                                                            }
+                                                            ?>
+
+                                                        <?php } else { ?>
+                                                        <div class="mt-3">
+                                                            <p class="text-muted mb-2 font-13"><strong>Interests : No Interests</strong></p>
+                                                        </div>
+                                                    <?php } ?>     
+
+                                                </div> 
+                                            </div>
                                         </div>
-                                        <a href="profile.php?userID=<?php echo $userRows[0] ?>"class="button three">View user</a>
+                                        <a href="profile.php?userID=<?php echo $userRows[0] ?>"class="button three d-flex flex-nowrap">View user</a>
                                     </div>
                                 </article>
                                 <?php
@@ -104,36 +132,42 @@
                                     $author = getUserFromID($postRows[1]);
                                 }
                                 ?>
-                                <article class="card mt-3 <?php if ($postRows[5]==1){echo "border-warning";} ?>">
+                                <article class="card mt-3 <?php
+                                if ($postRows[5] == 1) {
+                                    echo "border-warning";
+                                }
+                                ?>">
                                     <div class="card-body d-flex align-items-start">
-                                        <a href="profile.php?userID=<?= $postRows[1] ?>"><img class="me-2 avatar-sm rounded-circle" src="<?= 'images/profilepics/' . $author['profilePic'] ?>" alt="Generic placeholder image">
-                                            <div class="flex-grow-1">
-                                                <a href="viewPost.php?postID=<?= $postRows[0] ?>" class="button-nopadding six"><?php echo $postRows[2] ?></a> <small class="text-muted"><?php echo time_elapsed_string($postRows[4]) ?></small>
-                                                <?php if (getPostTagCount($postRows[0]) > 0) { ?>
-                                                    <div class="mt-3">
-                                                        <p class="text-muted mb-2 font-13"><strong>Tags :</strong>
-                                                            <?php
-                                                            $tags = getInterestByPostID($postRows[0]);
-
-                                                            while ($tag = $tags->fetch_array(MYSQLI_NUM)) {
-                                                                ?>
-                                                                <a href="process_category.php?categoryID=<?php echo $tag[1] ?>" class="tags">
-                                                                    <span class="badge rounded-pill bg-dark"><?php echo $tag[3] ?></span>
-                                                                </a>
+                                        <a href="profile.php?userID=<?= $postRows[1] ?>"><img class="me-2 avatar-md rounded-circle" src="<?= 'images/profilepics/' . $author['profilePic'] ?>" alt="Generic placeholder image">
+                                            <div class="d-flex flex-grow-1 mr-3">
+                                                <div class="flex-column">
+                                                    <a href="viewPost.php?postID=<?= $postRows[0] ?>" class="button-nopadding six"><?php echo $postRows[2] ?></a> <small class="text-muted"><?php echo time_elapsed_string($postRows[4]) ?></small>
+                                                    <?php if (getPostTagCount($postRows[0]) > 0) { ?>
+                                                        <div class="mt-3">
+                                                            <p class="text-muted mb-2 font-13"><strong>Tags :</strong>
                                                                 <?php
-                                                            }
-                                                            ?></p>
+                                                                $tags = getInterestByPostID($postRows[0]);
+
+                                                                while ($tag = $tags->fetch_array(MYSQLI_NUM)) {
+                                                                    ?>
+                                                                    <a href="process_category.php?categoryID=<?php echo $tag[1] ?>" class="tags">
+                                                                        <span class="badge rounded-pill bg-dark"><?php echo $tag[3] ?></span>
+                                                                    </a>
+                                                                    <?php
+                                                                }
+                                                                ?></p>
 
 
-                                                    </div>     
-                                                <?php } else { ?>
-                                                    <div class="mt-3">
-                                                        <p class="text-muted mb-2 font-13"><strong>Tags :  No Tags</strong></p>
-                                                    </div>
-                                                <?php } ?>
+                                                        </div>     
+                                                    <?php } else { ?>
+                                                        <div class="mt-3">
+                                                            <p class="text-muted mb-2 font-13"><strong>Tags :  No Tags</strong></p>
+                                                        </div>
+                                                    <?php } ?>
+                                                </div>
+
                                             </div>
-
-                                            <a href="viewPost.php?postID=<?php echo $postRows[0] ?>" class="button three">View Post</a>
+                                            <a href="viewPost.php?postID=<?php echo $postRows[0] ?>" class="button three d-flex flex-nowrap">View Post</a>
                                     </div>
                                 </article>
                                 <?php

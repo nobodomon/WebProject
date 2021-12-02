@@ -114,7 +114,6 @@ function getFollowingArray($userID) {
     return $following;
 }
 
-
 function getSubscribingArray($userID) {
     $config = parse_ini_file('../../private/db-config.ini');
     $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
@@ -158,7 +157,7 @@ function getHomePagePosts($userID) {
     $subscribingstr = str_repeat('?,', count($subscribingArray) - 1) . '?';
     $stmt = $conn->prepare("SELECT * FROM post WHERE author_id IN ($followingstr) OR author_id IN ($subscribingstr)  ORDER BY postedDateTime DESC");
     $types = $types ?: str_repeat('i', count($followingArray) + count($subscribingArray));
-    $stmt->bind_param($types, ...$followingArray,...$subscribingArray);
+    $stmt->bind_param($types, ...$followingArray, ...$subscribingArray);
     $list = $followingstr;
     if (!$stmt->execute()) {
         $errorMsg = $stmt->error;
@@ -1055,6 +1054,19 @@ function getPostCountBasedOnCategoryID($categoryID) {
     $conn->close();
     return $rows;
 }
+function getUserCountBasedOnCategoryID($categoryID) {
+
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+    $sql = 'SELECT count(*) FROM interest INNER JOIN users ON interest.userID = users.userID WHERE interest.categoryID = ?';
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $categoryID);
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_row()[0];
+    $stmt->close();
+    $conn->close();
+    return $rows;
+}
 
 function getCategoryNameBasedOnCategoryID($categoryID) {
 
@@ -1082,6 +1094,31 @@ function getPostBasedOnCategoryID($categoryID) {
     } else {
         //Prepare the statement:
         $stmt = $conn->prepare("SELECT * FROM categoryForPost INNER JOIN post ON categoryForPost.postID = post.post_id WHERE categoryForPost.categoryID = ? ORDER BY post.postedDateTime DESC");
+        //Bind & Execute the query statement:
+        $stmt->bind_param("i", $categoryID);
+        if (!$stmt->execute()) {
+            $errorMsg = "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            $success = false;
+        } else {
+            $result = $stmt->get_result();
+        }
+        $stmt->close();
+    }
+    $conn->close();
+    return $result;
+}
+function getUsersBasedOnCategoryID($categoryID) {
+    //Create database connection
+    $config = parse_ini_file('../../private/db-config.ini');
+    $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
+
+    // Check connection
+    if ($conn->connect_error) {
+        $errorMsg = "Connection failed: " . $conn->connect_error;
+        $success = false;
+    } else {
+        //Prepare the statement:
+        $stmt = $conn->prepare("SELECT * FROM interest INNER JOIN users ON interest.userID = users.userID WHERE interest.categoryID = ?");
         //Bind & Execute the query statement:
         $stmt->bind_param("i", $categoryID);
         if (!$stmt->execute()) {

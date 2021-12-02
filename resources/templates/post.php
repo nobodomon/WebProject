@@ -156,13 +156,9 @@
                     if ($currCommentingUser['userID'] == $sessionUserID) {
                         ?>
                         <div class="dropdown float-end">
-                            <a href="#" class="dropdown-toggle arrow-none card-drop nav-link" data-bs-toggle="dropdown" aria-label="Profile options" aria-expanded="false">
-                                <i class="mdi mdi-dots-vertical"></i>
+                            <a href="process_deletecomment.php?commentID=<?php echo $commentRows[0] ?>" class="button-nopadding six deleteCommentBtn" aria-label="Profile options">
+                                <i class="bi bi-x"></i>
                             </a>
-                            <div class="dropdown-menu dropdown-menu-end">
-                                <!-- item-->
-                                <a href="process_deletecomment.php?commentID=<?php echo $commentRows[0] ?>" class="dropdown-item">Delete comment</a>
-                            </div>
                         </div>
                         <?php
                     }
@@ -190,7 +186,7 @@
                 <img src="<?php echo $placeHolderPic ?>" class="rounded-circle" alt="Generic placeholder image" height="31" width="31">
             </a>
             <form class="d-flex flex-grow-1" method="post" action="<?php echo $commentProcess ?>">
-                <input type="text" id="comment-<?= $postID ?>" name="comment" class="form-control border-0 form-control-sm me-2 flex-grow-1" required placeholder="Add comment">
+                <input type="text" id="comment-<?= $postID ?>" name="comment" class="form-control border-0 form-control-sm me-2 flex-grow-1" autocomplete="off" required placeholder="Add comment">
                 <button type="submit" name="_submit" class="btn btn-primary" value='Submit'>Submit</button>
             </form>
         </div>

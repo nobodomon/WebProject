@@ -30,6 +30,7 @@
             toolbar_mode: 'floating',
             tinycomments_mode: 'embedded',
             tinycomments_author: 'Author name',
+            object_resizing : 'img',
             elementpath: false,
         });
     </script>

@@ -5,7 +5,9 @@
     font-size: 1em;
     position: relative;
     padding: 10px;
+    white-space: nowrap;
 }
+
 
 .button-nopadding{
     text-decoration: none;
@@ -14,6 +16,7 @@
     font-size: 1em;
     font-weight: bold;
     position: relative;
+    white-space: nowrap;
 }
 .button-nopadding-small{
     text-decoration: none;
@@ -22,6 +25,7 @@
     font-size: 0.8em;
     font-weight: bold;
     position: relative;
+    white-space: nowrap;
 }
 
 .button-looking-text{
@@ -31,6 +35,7 @@
     font-size: 0.8em;
     font-weight: bold;
     position: relative;
+    white-space: nowrap;
 }
 .button-looking-text-big{
     text-decoration: none;
@@ -39,6 +44,7 @@
     font-size: 1.1em;
     font-weight: bold;
     position: relative;
+    white-space: nowrap;
 }
 /* BUTTON EEN */
 
