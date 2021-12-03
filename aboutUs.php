@@ -64,10 +64,10 @@
                                         <div class="mb-3 text-center">2101821</div>
                                         <hr>
                                         <div class = "text-center">
-                                            ???????? <br>
-                                            ???????? <br>
-                                            ???????? <br>
-                                            ???????? <br>
+                                            想把自己放进冰箱 <br>
+                                            呆上一天没人阻挡 <br>
+                                            我来帮你十倍十倍 <br>
+                                            十倍十倍感受凉爽 <br>
                                         </div>
                                     </section>
                                 </div><!--//card-body-->
@@ -91,12 +91,12 @@
                                         <div class="mb-3 text-center">2102972</div>
                                         <hr>
                                         <div class = "text-center">
-                                            Super Idol???<br>
-                                            ?????<br>
-                                            ???????<br>
-                                            ?????<br>
-                                            ?? 105 �C??<br>
-                                            ????????<br>
+                                            Super Idol的笑容<br>
+                                            都没你的甜<br>
+                                            八月正午的阳光<br>
+                                            都没你耀眼<br>
+                                            热爱 105 °C的你<br>
+                                            滴滴清纯的蒸馏水<br>
                                         </div>
 
                                     </section>

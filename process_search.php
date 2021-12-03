@@ -137,7 +137,7 @@
                                     echo "border-warning";
                                 }
                                 ?>">
-                                    <div class="card-body d-flex align-items-start">
+                                    <div class="card-body d-flex align-items-center">
                                         <a href="profile.php?userID=<?= $postRows[1] ?>"><img class="me-2 avatar-md rounded-circle" src="<?= 'images/profilepics/' . $author['profilePic'] ?>" alt="Generic placeholder image">
                                             <div class="d-flex flex-grow-1 mr-3">
                                                 <div class="flex-column">

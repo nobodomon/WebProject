@@ -252,23 +252,49 @@ function getUserFromUsername($id) {
 
 function searchPostCount($query) {
     global $postSearchSuccess, $postSearchErrorMsg;
+    if (isset($_SESSION["userID"])) {
+        if (empty($_SESSION["userID"])) {
+            $userID = -1;
+        } else {
+            $userID = $_SESSION["userID"];
+        }
+    } else {
+        $userID = -1;
+    }
     if ($query == "") {
         $postSearchErrorMsg = "Search is empty";
         $postSearchSuccess = false;
     } else {
         $splited_query = explode(' ', $query);
-        $sql_prep = "SELECT count(*) FROM post WHERE title LIKE ? OR content LIKE ?";
-        $splited_query[0] = "%$splited_query[0]%";
-        $param = array_fill(0, 2, $splited_query[0]);
+        $sql_prep = "SELECT count(*) FROM post WHERE (title LIKE ? OR content LIKE ?";
         $types = "ss";
+        $and_query = array();
+        $and_types = "";
+        $and_sql = "";
+        if(strpos($splited_query[0], "&quot;") !== false){
+            array_push($and_query, "%".str_replace("&quot;", '', $splited_query[0])."%", "%".str_replace("&quot;", '', $splited_query[0]))."%";
+            $and_types .= "ss";
+            $and_sql .= " AND (title LIKE ? OR content LIKE ?)";
+        }
+        $splited_query[0] = "%" . str_replace("&quot;", '', $splited_query[0]) . "%";
+        $param = array_fill(0, 2, $splited_query[0]);
         for ($i = 1; $i < count($splited_query); $i++) {
+            if(strpos($splited_query[$i], "&quot;") !== false){
+                array_push($and_query, "%" . str_replace("&quot;", '', $splited_query[$i]) . "%", "%" . str_replace("&quot;", '', $splited_query[$i]) . "%");
+                $and_types .= "ss";
+                $and_sql .= " AND (title LIKE ? OR content LIKE ?)";
+            }
             $sql_prep = $sql_prep . " OR title LIKE ? OR content LIKE ?";
             $types = $types . "ss";
-            $splited_query[$i] = "%$splited_query[$i]%";
+            $splited_query[$i] = "%" . str_replace("&quot;", '', $splited_query[$i]) . "%";
             for ($j = 0; $j < 2; $j++) {
                 array_push($param, $splited_query[$i]);
             }
+            
         }
+        $sql_prep = $sql_prep . ")". $and_sql . " AND (postType=0 or author_id = " . $userID . " or author_id in (select userID from subscribers where subscriberID=" . $userID . " and endDate>now()) or author_id in(select userID from followers where followerID = " . $userID . "))";
+        $types .= $and_types;
+        $param = array_merge($param, $and_query);
 
         //Create database connection
         $config = parse_ini_file('../../private/db-config.ini');
@@ -315,18 +341,34 @@ function getPostsRelatedToQuery($query) {
     } else {
         $splited_query = explode(' ', $query);
         $sql_prep = "SELECT * FROM post WHERE (title LIKE ? OR content LIKE ?";
-        $splited_query[0] = "%$splited_query[0]%";
-        $param = array_fill(0, 2, $splited_query[0]);
         $types = "ss";
+        $and_query = array();
+        $and_types = "";
+        $and_sql = "";
+        if(strpos($splited_query[0], "&quot;") !== false){
+            array_push($and_query, "%".str_replace("&quot;", '', $splited_query[0])."%", "%".str_replace("&quot;", '', $splited_query[0]))."%";
+            $and_types .= "ss";
+            $and_sql .= " AND (title LIKE ? OR content LIKE ?)";
+        }
+        $splited_query[0] = "%" . str_replace("&quot;", '', $splited_query[0]) . "%";
+        $param = array_fill(0, 2, $splited_query[0]);
         for ($i = 1; $i < count($splited_query); $i++) {
+            if(strpos($splited_query[$i], "&quot;") !== false){
+                array_push($and_query, "%" . str_replace("&quot;", '', $splited_query[$i]) . "%", "%" . str_replace("&quot;", '', $splited_query[$i]) . "%");
+                $and_types .= "ss";
+                $and_sql .= " AND (title LIKE ? OR content LIKE ?)";
+            }
             $sql_prep = $sql_prep . " OR title LIKE ? OR content LIKE ?";
             $types = $types . "ss";
-            $splited_query[$i] = "%$splited_query[$i]%";
+            $splited_query[$i] = "%" . str_replace("&quot;", '', $splited_query[$i]) . "%";
             for ($j = 0; $j < 2; $j++) {
                 array_push($param, $splited_query[$i]);
             }
+            
         }
-        $sql_prep = $sql_prep . ") and (postType=0 or author_id = " . $userID . " or author_id in (select userID from subscribers where subscriberID=" . $userID . " and endDate>now()) or author_id in(select userID from followers where followerID = " . $userID . "))";
+        $sql_prep = $sql_prep . ")". $and_sql . " AND (postType=0 or author_id = " . $userID . " or author_id in (select userID from subscribers where subscriberID=" . $userID . " and endDate>now()) or author_id in(select userID from followers where followerID = " . $userID . "))";
+        $types .= $and_types;
+        $param = array_merge($param, $and_query);
 
         //Create database connection
         $config = parse_ini_file('../../private/db-config.ini');
@@ -362,18 +404,40 @@ function searchUserNameCount($query) {
         $userSearchSuccess = false;
     } else {
         $splited_query = explode(' ', $query);
-        $sql_prep = "SELECT count(*) FROM users WHERE username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?";
-        $splited_query[0] = "%$splited_query[0]%";
-        $param = array_fill(0, 4, $splited_query[0]);
+        $sql_prep = "SELECT count(*) FROM users WHERE (username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?";
         $types = "ssss";
+        $and_query = array();
+        $and_types = "";
+        $and_sql = "";
+        if(strpos($splited_query[0], "&quot;") !== false){
+            for ($j = 0; $j < 4; $j++) {
+                array_push($and_query, "%" . str_replace("&quot;", '', $splited_query[0]) . "%");
+            }
+            $and_types .= "ssss";
+            $and_sql .= " AND (username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?)";
+        }
+        $splited_query[0] = "%" . str_replace("&quot;", '', $splited_query[0]) . "%";
+        $param = array_fill(0, 4, $splited_query[0]);
         for ($i = 1; $i < count($splited_query); $i++) {
+            if(strpos($splited_query[$i], "&quot;") !== false){
+                for ($j = 0; $j < 4; $j++) {
+                    array_push($and_query, "%" . str_replace("&quot;", '', $splited_query[$i]) . "%");
+                }
+                $and_types .= "ssss";
+                $and_sql .= " AND (username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?)";
+            }
             $sql_prep = $sql_prep . " OR username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?";
             $types = $types . "ssss";
-            $splited_query[$i] = "%$splited_query[$i]%";
+            $splited_query[$i] = "%" . str_replace("&quot;", '', $splited_query[$i]) . "%";
             for ($j = 0; $j < 4; $j++) {
                 array_push($param, $splited_query[$i]);
             }
+            
         }
+        $sql_prep = $sql_prep . ")". $and_sql;
+        $types .= $and_types;
+        $param = array_merge($param, $and_query);
+        
         //Create database connection
         $config = parse_ini_file('../../private/db-config.ini');
         $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
@@ -410,18 +474,39 @@ function getUserByUserName($query) {
         $userSearchSuccess = false;
     } else {
         $splited_query = explode(' ', $query);
-        $sql_prep = "SELECT * FROM users WHERE username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?";
-        $splited_query[0] = "%$splited_query[0]%";
-        $param = array_fill(0, 4, $splited_query[0]);
+        $sql_prep = "SELECT * FROM users WHERE (username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?";
         $types = "ssss";
+        $and_query = array();
+        $and_types = "";
+        $and_sql = "";
+        if(strpos($splited_query[0], "&quot;") !== false){
+            for ($j = 0; $j < 4; $j++) {
+                array_push($and_query, "%" . str_replace("&quot;", '', $splited_query[0]) . "%");
+            }
+            $and_types .= "ssss";
+            $and_sql .= " AND (username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?)";
+        }
+        $splited_query[0] = "%" . str_replace("&quot;", '', $splited_query[0]) . "%";
+        $param = array_fill(0, 4, $splited_query[0]);
         for ($i = 1; $i < count($splited_query); $i++) {
+            if(strpos($splited_query[$i], "&quot;") !== false){
+                for ($j = 0; $j < 4; $j++) {
+                    array_push($and_query, "%" . str_replace("&quot;", '', $splited_query[$i]) . "%");
+                }
+                $and_types .= "ssss";
+                $and_sql .= " AND (username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?)";
+            }
             $sql_prep = $sql_prep . " OR username LIKE ? OR fname LIKE ? OR lname LIKE ? OR email LIKE ?";
             $types = $types . "ssss";
-            $splited_query[$i] = "%$splited_query[$i]%";
+            $splited_query[$i] = "%" . str_replace("&quot;", '', $splited_query[$i]) . "%";
             for ($j = 0; $j < 4; $j++) {
                 array_push($param, $splited_query[$i]);
             }
         }
+        $sql_prep = $sql_prep . ")". $and_sql;
+        $types .= $and_types;
+        $param = array_merge($param, $and_query);
+        
         //Create database connection
         $config = parse_ini_file('../../private/db-config.ini');
         $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
