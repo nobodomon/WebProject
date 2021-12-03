@@ -7,6 +7,7 @@
         <?php
         ?>
         <?php
+        include "nav.inc.php";
         $email = $errorMsg = $successMsg = "";
         $userID;
         $success = true;
@@ -25,12 +26,6 @@
         }
 
         //Helper function that checks input for malicious or unwanted content. 
-        function sanitize_input($data) {
-            $data = trim($data);
-            $data = stripslashes($data);
-            $data = htmlspecialchars($data);
-            return $data;
-        }
 
         function retrieveMemberFromDB() {
             global $userID, $email, $pwd, $lname, $fname, $errorMsg, $successMsg, $success;
@@ -77,9 +72,7 @@
             $conn->close();
             return $success;
         }
-
-        include "nav.inc.php"
-        ?>
+?>
         <main class="container">
             <?php
             if ($success) {
