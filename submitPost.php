@@ -7,11 +7,11 @@
         <?php
         include "nav.inc.php"
         ?>
+        <main class="container">
         <?php
         $title = $errorMsg = "";
         $success = true;
-        if (empty($_POST["title"]) || empty($_POST["content"]) || empty($_POST["interest"])) {
-            $interests = array();
+        if (empty($_POST["title"]) || empty($_POST["content"])) {
             $errorMsg .= "Title and content and interest is required.<br>";
             $success = false;
         } else {
@@ -110,6 +110,8 @@
         } else {
             include("resources/templates/errorpage.php");
         }
+        ?>
+        </main><?php
         include "footer.inc.php"
         ?>
     </body>

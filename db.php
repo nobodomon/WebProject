@@ -1054,6 +1054,7 @@ function getPostCountBasedOnCategoryID($categoryID) {
     $conn->close();
     return $rows;
 }
+
 function getUserCountBasedOnCategoryID($categoryID) {
 
     $config = parse_ini_file('../../private/db-config.ini');
@@ -1075,11 +1076,20 @@ function getCategoryNameBasedOnCategoryID($categoryID) {
     $sql = 'SELECT categoryName FROM categories WHERE categoryID = ?';
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $categoryID);
-    $stmt->execute();
-    $rows = $stmt->get_result()->fetch_row()[0];
-    $stmt->close();
-    $conn->close();
-    return $rows;
+    if (!$stmt->execute()) {
+        return "";
+    } else {
+        
+        $rows = $stmt->get_result()->fetch_row();
+        $stmt->close();
+        $conn->close();
+        if($rows == NULL){
+            return "";
+        }else{
+            
+            return $rows[0];
+        }
+    }
 }
 
 function getPostBasedOnCategoryID($categoryID) {
@@ -1107,6 +1117,7 @@ function getPostBasedOnCategoryID($categoryID) {
     $conn->close();
     return $result;
 }
+
 function getUsersBasedOnCategoryID($categoryID) {
     //Create database connection
     $config = parse_ini_file('../../private/db-config.ini');

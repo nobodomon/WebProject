@@ -44,6 +44,30 @@
                             </div>
                         </section>
                         <!---->
+                        <section class ="card">
+                            <div class="card-body">
+
+                                <div class="mt-3">
+                                    <p class="text-muted mb-2 font-13"><strong>Tags :</strong> 
+                                        <?php
+                                        $interests = getAllCategories();
+
+                                        while ($interest = $interests->fetch_array(MYSQLI_NUM)) {
+                                            $categoryID = $interest[0];
+                                            ?>
+
+                                            <a href="process_category.php?categoryID=<?php echo $categoryID ?>" class="tags">
+                                                <span class="badge rounded-pill bg-dark"><?php echo $interest[1] ?></span>
+                                            </a>
+
+                                            <?php
+                                        }
+                                        ?>
+
+
+                                </div>  
+                            </div>
+                        </section>
                     </div>
                     <div class="col-xl-7">
                         <section class="card" role="feed">

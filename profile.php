@@ -8,54 +8,63 @@
         include "nav.inc.php";
         $userID = $_GET['userID'];
         $viewingUser = getUserFromID($userID);
-        $posts = getPostByUser($userID);
-        $categoriesResults = getAllCategories();
-        if (!isset($_SESSION['userID'])) {
-            $sessionUserID = -1;
-            $followed = false;
-            $subscribed = false;
+        if ($viewingUser == NULL) {
+            $errorMsg = "User was not found!";
+            ?>
+                <main class="container">
+                    <?php
+            include("resources/templates/errorpage.php");
+            ?>
+                </main><?php
         } else {
-            $sessionUserID = $_SESSION['userID'];
-            $sessionUser = getUserFromID($_SESSION['userID']);
-            $followed = checkIfFollowed($userID, $_SESSION['userID']);
-            $subscribed = checkIfSubscribed($userID, $_SESSION['userID']);
-        }
-        ?>
-        <!-- Modal -->
-        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <?php
-                        if ($subscribed) {
-                            $title = "Confirm to unsubscribe?";
-                        } else {
-
-                            $title = "Confirm subscription?";
-                        }
-                        ?>
-                        <h5 class="modal-title" id="staticBackdropLabel"><?php echo $title ?></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <?php
-                        if ($subscribed) {
-                            //Unsubscribe dialog
-                            $subBtn = "<a href='process_subscribe.php?subscriberID=" . $userID . "' class='button three'>Unsubscribe</a>";
-                            ?>
-                            <h3>Are you sure?</h3>
-                            <p>Subscriptions are non refundable!</p>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <?= $subBtn ?>
-                            </div>
+            $posts = getPostByUser($userID);
+            $categoriesResults = getAllCategories();
+            if (!isset($_SESSION['userID'])) {
+                $sessionUserID = -1;
+                $followed = false;
+                $subscribed = false;
+            } else {
+                $sessionUserID = $_SESSION['userID'];
+                $sessionUser = getUserFromID($_SESSION['userID']);
+                $followed = checkIfFollowed($userID, $_SESSION['userID']);
+                $subscribed = checkIfSubscribed($userID, $_SESSION['userID']);
+            }
+            ?>
+            <!-- Modal -->
+            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
                             <?php
-                        } else {
-                            //Subscribe dialog
+                            if ($subscribed) {
+                                $title = "Confirm to unsubscribe?";
+                            } else {
+
+                                $title = "Confirm subscription?";
+                            }
                             ?>
-                            <h3>Confirm Subscription?</h3>
-                            <p>Subscribing to <?= "@" . $viewingUser['username'] ?> will allow you to see exclusive subscriber only posts. Subscription Fee will be $10.</p>
-                            <form method="post" action="process_subscribe.php?subscriberID=<?php echo $userID ?>">
+                            <h5 class="modal-title" id="staticBackdropLabel"><?php echo $title ?></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <?php
+                            if ($subscribed) {
+                                //Unsubscribe dialog
+                                $subBtn = "<a href='process_subscribe.php?subscriberID=" . $userID . "' class='button three'>Unsubscribe</a>";
+                                ?>
+                                <h3>Are you sure?</h3>
+                                <p>Subscriptions are non refundable!</p>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <?= $subBtn ?>
+                                </div>
+                                <?php
+                            } else {
+                                //Subscribe dialog
+                                ?>
+                                <h3>Confirm Subscription?</h3>
+                                <p>Subscribing to <?= "@" . $viewingUser['username'] ?> will allow you to see exclusive subscriber only posts. Subscription Fee will be $10.</p>
+                                <form method="post" action="process_subscribe.php?subscriberID=<?php echo $userID ?>">
                                     <label for="cardName" class="mt-2 mb-2 button-looking-text">Name on card:</label>
                                     <div class="input-group mb-1">
                                         <span class="input-group-text bg-primary text-white"><i
@@ -107,11 +116,11 @@
                                         <span class="input-group-text bg-primary text-white"><i class="bi bi-credit-card-2-back"></i></span>
                                         <input class="form-control" required type="number" id="ccv" name="ccv" pattern="[0-9]*" placeholder="CCV on card">
                                     </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary">Subscribe</button>
-                                </div>
-                                </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                                    </div>
+                            </div>
                             </form>
                             <?php
                         }
@@ -362,20 +371,20 @@
                             <div class="row">
                                 <div class="col-12 border-end border-light">
                                     <h6 class="text-muted mt-1 mb-2 fw-normal">Total Posts</h5>
-                                    <span class="button-looking-text-big"><?php echo getPostCountsByUser($userID,3) ?></span>
+                                        <span class="button-looking-text-big"><?php echo getPostCountsByUser($userID, 3) ?></span>
                                 </div>
                                 <hr class="my-2">
                                 <div class="col-4 border-end border-light">
                                     <h6 class="text-muted mt-1 mb-2 fw-normal">Public posts</h5>
-                                    <span class="button-looking-text-big"><?php echo getPostCountsByUser($userID,0) ?></span>
+                                        <span class="button-looking-text-big"><?php echo getPostCountsByUser($userID, 0) ?></span>
                                 </div>
                                 <div class="col-4 border-end border-light">
                                     <h6 class="text-muted mt-1 mb-2 fw-normal">Follower posts</h5>
-                                        <span class="button-looking-text-big"><?php echo getPostCountsByUser($userID,1) ?></span>
+                                        <span class="button-looking-text-big"><?php echo getPostCountsByUser($userID, 1) ?></span>
                                 </div>
                                 <div class="col-4 border-end border-light">
                                     <h6 class="text-muted mt-1 mb-2 fw-normal">Exclusive posts</h5>
-                                        <span class="button-looking-text-big"><?php echo getPostCountsByUser($userID,2) ?></span>
+                                        <span class="button-looking-text-big"><?php echo getPostCountsByUser($userID, 2) ?></span>
                                 </div>
                             </div>
                         </div>
@@ -432,7 +441,9 @@
             </div>
         </div>
     </main>
+
     <?php
+    }
     include "footer.inc.php"
     ?>
 </body>

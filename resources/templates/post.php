@@ -66,7 +66,7 @@
         </div>
         <hr>
         <div class="w-100">
-            <section class="card-text">
+            <section class="card-text postContent">
                 <?php echo $content ?></section>
 
             <?php if (getPostTagCount($postID) > 0) { ?>

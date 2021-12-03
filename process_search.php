@@ -21,7 +21,7 @@
                         <li class="breadcrumb-item active" aria-current="page">Search Results</li>
                     </ol>
                 </nav>
-                <span class="text-center flex-grow-1 button-looking-text-big"> Your search for: <?php echo $query ?></span>
+                <span class="text-center flex-grow-1 button-looking-text-big">"<?php echo $query ?>"</span>
             </section>
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item" role="presentation">

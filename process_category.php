@@ -33,7 +33,7 @@
                 </nav>
                 <!--change to category Name-->
 
-                <span class="text-center flex-grow-1 button-looking-text-big"> You are viewing posts and users related to: <?php echo $categoryObject ?></span>
+                <span class="text-center flex-grow-1 button-looking-text-big">"<?php echo $categoryObject ?>"</span>
             </section>
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item " role="presentation">
@@ -87,7 +87,7 @@
                                             </div>
                                         </div>  
                                     </div>
-                                    <a href="profile.php?userID=<?php echo $userRows[3] ?>"class="button three d-flex flex-nowrap">View user</a>
+                                    <a href="profile.php?userID=<?php echo $userRows[2] ?>"class="button three d-flex flex-nowrap">View user</a>
                                 </div>
 
                             </article>
