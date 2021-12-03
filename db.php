@@ -5,6 +5,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+function sanitize_input($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
+}
 
 function time_elapsed_string_short($datetime, $full = false) {
     $now = new DateTime;

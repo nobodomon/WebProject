@@ -25,10 +25,10 @@
             $errorMsg .= "All fields are required.<br>";
             $success = false;
         } else {
-            $username = htmLawed($_POST["username"]);
-            $fname = htmLawed($_POST["fname"]);
-            $lname = htmLawed($_POST["lname"]);
-            $biography = htmLawed($_POST["biography"]);
+            $username = sanitize_input(htmLawed($_POST["username"]));
+            $fname = sanitize_input(htmLawed($_POST["fname"]));
+            $lname = sanitize_input(htmLawed($_POST["lname"]));
+            $biography = sanitize_input(htmLawed($_POST["biography"]));
             if ($_POST["email"] != $_POST["confirm-email"]) {
                 $success = false;
                 $errorMsg .= "Emails do not match! <br>";
@@ -63,13 +63,13 @@
                 $errorMsg .= "Biography is too long! <br>";
             }
             if ($success) {
-                $userResultsBasedOnUsername = getUserFromUsername($_POST["username"]);
-                if ($currentUserDetails["username"] == $_POST["username"]) {
+                $userResultsBasedOnUsername = getUserFromUsername($username);
+                if ($currentUserDetails["username"] == $username) {
                     // same username, no chnage in username
                     $success = true;
                 } else {
                     // if it is in $userResultsBasedOnUsername, dont allow as someone else taken the username
-                    if ($userResultsBasedOnUsername["username"] == $_POST["username"]) {
+                    if ($userResultsBasedOnUsername["username"] == $username) {
                         $errorMsg .= "The username has been taken.<br>";
                         $success = false;
                     }

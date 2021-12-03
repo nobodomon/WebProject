@@ -7,6 +7,7 @@
     <body>
         <?php
         include 'nav.inc.php';
+        $query = sanitize_input($query);
         $userCount = searchUserNameCount($query);
         $postCount = searchPostCount($query);
         ?>

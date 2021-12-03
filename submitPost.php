@@ -63,6 +63,7 @@
         function createPost() {
             global $success, $successMsg, $errorMsg, $title, $content, $postType, $interests;
             $sanitizedContent = htmLawed($content);
+            $title = sanitize_input(htmLawed($title));
             $config = parse_ini_file('../../private/db-config.ini');
             $conn = new mysqli($config['servername'], $config['username'], $config['password'], $config['dbname']);
             if ($conn->connect_error) {
